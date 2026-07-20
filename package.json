@@ -1,0 +1,16 @@
+{
+  "name": "tuankhang-home",
+  "private": true,
+  "scripts": {
+    "dev": "tailwindcss -i ./assets/src/home.css -o ./assets/dist/home.min.css --watch",
+    "build:css": "tailwindcss -i ./assets/src/home.css -o ./assets/dist/home.min.css --minify",
+    "build:js": "esbuild ./assets/src/home.js --bundle --minify --target=es2020 --outfile=./assets/dist/home.min.js",
+    "build:images": "node ./scripts/build-home-images.mjs",
+    "build": "npm run build:css && npm run build:js && npm run build:images"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.1.11",
+    "esbuild": "^0.25.6",
+    "tailwindcss": "^4.1.11"
+  }
+}

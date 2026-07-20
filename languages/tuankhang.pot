@@ -1,0 +1,278 @@
+﻿#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: TUAN KHANG\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-01-08 03:12+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: \n"
+"Language: \n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Loco https://localise.biz/\n"
+"X-Loco-Version: 2.6.14; wp-6.7.1\n"
+"X-Domain: tuankhang"
+
+#: footer.php:57
+msgid ""
+"[Hà Nội]: Số 23, ngõ 38 Phương Mai, Phường Kim Liên, Quận Đống Đa, Hà Nội."
+msgstr ""
+
+#: footer.php:59
+msgid ""
+"[Hồ Chí Minh]: Số 1/1 Đường Hoàng Việt, Phường 4, Quận Tân Bình, Hồ Chí Minh."
+msgstr ""
+
+#: footer.php:58
+msgid "[Đà Nẵng]: Số 66 Võ Văn Tần Thanh Khê, Đà Nẵng."
+msgstr ""
+
+#: footer.php:65
+msgid "Bản Đồ"
+msgstr ""
+
+#: index.php:306
+msgid "CONTAINER MỖI NĂM"
+msgstr ""
+
+#. Name of the template
+#: page-caidat.php:2
+msgid "Cài Đặt"
+msgstr ""
+
+#: single.php:54
+msgid "Các bài đăng khác"
+msgstr ""
+
+#: index.php:21 footer.php:16 footer.php:19 footer.php:20 header.php:120
+#: header.php:123 header.php:182 header.php:183
+msgid "Công ty TNHH Dược và Thiết bị y tế Tuấn Khang"
+msgstr ""
+
+#: sidebar.php:4
+msgid "Danh mục Sản phẩm"
+msgstr ""
+
+#. Description of the theme
+msgid "Duoc xay dung va phat trien boi Duytv"
+msgstr ""
+
+#. Author of the theme
+msgid "Duytv"
+msgstr ""
+
+#: footer.php:37
+msgid "Dịch vụ khách hàng"
+msgstr ""
+
+#: index.php:246
+msgid "Dự án tiêu biểu"
+msgstr ""
+
+#: header.php:68 header.php:70
+msgid "Email"
+msgstr ""
+
+#: footer.php:82 footer.php:83
+msgid "Fanpage Facebook"
+msgstr ""
+
+#: footer.php:88 footer.php:89
+msgid "Google Plus"
+msgstr ""
+
+#: footer.php:27 header.php:64 single-san-pham.php:329
+msgid "Hotline"
+msgstr ""
+
+#: header.php:62
+msgid "Hotline:"
+msgstr ""
+
+#. URI of the theme
+#. Author URI of the theme
+msgid "http://tuankhangmedical.com"
+msgstr ""
+
+#: index.php:300
+msgid "HÃNG SẢN XUẤT"
+msgstr ""
+
+#: single-san-pham.php:153
+msgid "Hàng có sẵn có thể giao ngay"
+msgstr ""
+
+#: index.php:285
+msgid "Hành trình thực hiện ước mơ"
+msgstr ""
+
+#: single-san-pham.php:105
+msgid "Hãng"
+msgstr ""
+
+#: footer.php:55
+msgid "Hệ thống chi nhánh"
+msgstr ""
+
+#: index.php:313
+msgid "Hỗ trợ"
+msgstr ""
+
+#: footer.php:91 footer.php:92
+msgid "Instagram"
+msgstr ""
+
+#: index.php:294
+msgid "Khách Hàng"
+msgstr ""
+
+#: footer.php:94 footer.php:95
+msgid "Kênh Youtube"
+msgstr ""
+
+#: footer.php:79
+msgid "Kết nối với chúng tôi qua"
+msgstr ""
+
+#: search.php:10 search.php:15
+msgid "Kết quả tìm kiếm"
+msgstr ""
+
+#: search.php:29
+msgid "Kết quả tìm kiếm cho từ khóa"
+msgstr ""
+
+#: single-san-pham.php:133
+msgid "Lợi ích khi mua hàng tại Tuấn Khang"
+msgstr ""
+
+#: header.php:172
+msgid "Menu"
+msgstr ""
+
+#: single-san-pham.php:94
+msgid "Model"
+msgstr ""
+
+#: single-san-pham.php:173
+msgid "MÔ TẢ CHI TIẾT"
+msgstr ""
+
+#: footer.php:25
+msgid ""
+"Mã số thuế: 0108344655 - Ngày cấp: 28/06/2018 - Nơi cấp: Sở Kế Hoạch Và Đầu "
+"Tư Tp.Hà Nội"
+msgstr ""
+
+#: header.php:86
+msgid "Ngôn ngữ"
+msgstr ""
+
+#: single-san-pham.php:287
+msgid "Nhà"
+msgstr ""
+
+#: single-san-pham.php:139
+msgid "Nhà cung cấp uy tín"
+msgstr ""
+
+#: header.php:100
+msgid "Nhập từ khóa tìm kiếm ..."
+msgstr ""
+
+#: index.php:319
+msgid "Năm Kinh nghiệm"
+msgstr ""
+
+#: 404.php:23
+msgid ""
+"Rất tiếc, liên kết không tồn tại. Vui lòng thử lại hoặc quay lại trang chủ !"
+msgstr ""
+
+#: archive-san-pham.php:8 archive-san-pham.php:16 archive-san-pham.php:27
+msgid "Sản Phẩm"
+msgstr ""
+
+#: index.php:189
+msgid "Sản phẩm"
+msgstr ""
+
+#: single-san-pham.php:143
+msgid "Sản phẩm chất lượng, giá cả hợp lý"
+msgstr ""
+
+#: single-san-pham.php:258
+msgid "Sản phẩm liên quan"
+msgstr ""
+
+#: single-san-pham.php:148
+msgid "Thời gian bảo hành 12 tháng, dịch vụ chuyên nghiệp"
+msgstr ""
+
+#: archive-san-pham.php:13 taxonomy-danh-muc.php:42 taxonomy-danh-muc.php:42
+#: search.php:14 search.php:14 single-san-pham.php:37 single-san-pham.php:37
+msgid "Trang Chủ"
+msgstr ""
+
+#. Name of the theme
+msgid "TUAN KHANG"
+msgstr ""
+
+#: footer.php:85 footer.php:86
+msgid "Twitter"
+msgstr ""
+
+#: header.php:101
+msgid "Tìm"
+msgstr ""
+
+#: header.php:96
+msgid "Tìm kiếm"
+msgstr ""
+
+#: index.php:56 index.php:126 index.php:177 index.php:226
+msgid "Xem thêm"
+msgstr ""
+
+#: index.php:189
+msgid "Xem toàn bộ"
+msgstr ""
+
+#: index.php:238
+msgid "Xem toàn bộ sản phẩm"
+msgstr ""
+
+#: single-san-pham.php:116
+msgid "Xuất Xứ"
+msgstr ""
+
+#: footer.php:111
+msgid "© Copyright 2021 by TUẤN KHANG. All Rights Reserved."
+msgstr ""
+
+#: footer.php:102 footer.php:104
+msgid "Đã Thông Báo Với Bộ Công Thương"
+msgstr ""
+
+#: 404.php:9
+msgid "Đã xảy ra lỗi"
+msgstr ""
+
+#: single-san-pham.php:322
+msgid "Đăng ký"
+msgstr ""
+
+#: index.php:338
+msgid "Đối tác của TUẤN KHANG"
+msgstr ""
+
+#: index.php:348 index.php:353
+msgid "Đối tác của Tuấn Khang"
+msgstr ""
+
+#: single-san-pham.php:158
+msgid "Ưu đãi khi mua hàng với số lượng lớn"
+msgstr ""

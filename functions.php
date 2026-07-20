@@ -1,0 +1,226 @@
+<?php
+
+//// Add RSS links to <head> section
+//automatic_feed_links();
+
+if (!function_exists('tuankhang_setup')) :
+    /**
+     * Sets up theme defaults and registers support for various WordPress features.
+     *
+     * Note that this function is hooked into the after_setup_theme hook, which
+     * runs before the init hook. The init hook is too late for some features, such
+     * as indicating support for post thumbnails.
+     */
+    function tuankhang_setup()
+    {
+        /*
+         * Make theme available for translation.
+         * Translations can be filed in the /languages/ directory.
+         * If you're building a theme based on tuankhang, use a find and replace
+         * to change 'tuankhang' to the name of your theme in all the template files.
+         */
+        load_theme_textdomain('tuankhang', get_template_directory() . '/languages');
+
+        // Add default posts and comments RSS feed links to head.
+        add_theme_support('automatic-feed-links');
+
+        /*
+         * Let WordPress manage the document title.
+         * By adding theme support, we declare that this theme does not use a
+         * hard-coded <title> tag in the document head, and expect WordPress to
+         * provide it for us.
+         */
+        add_theme_support('title-tag');
+
+        /*
+         * Enable support for Post Thumbnails on posts and pages.
+         *
+         * @link https://developer.wordpress.org/themes/functionality/featured-images-post-thumbnails/
+         */
+        add_theme_support('post-thumbnails');
+
+
+        /*
+         * Switch default core markup for search form, comment form, and comments
+         * to output valid HTML5.
+         */
+        add_theme_support('html5', array(
+            'search-form',
+            'comment-form',
+            'comment-list',
+            'gallery',
+            'caption',
+        ));
+    }
+endif;
+add_action('after_setup_theme', 'tuankhang_setup');
+
+require_once get_theme_file_path('/inc/home-tailwind.php');
+
+/**
+ * Keep the legacy frontend untouched on inner pages while the homepage uses a
+ * self-contained Tailwind bundle with no jQuery runtime.
+ */
+function tuankhang_enqueue_frontend_assets()
+{
+    if (is_front_page()) {
+        $css_path = get_theme_file_path('/assets/dist/home.min.css');
+        $js_path = get_theme_file_path('/assets/dist/home.min.js');
+        if (is_file($css_path)) {
+            wp_enqueue_style('tuankhang-home', get_theme_file_uri('/assets/dist/home.min.css'), array(), (string) filemtime($css_path));
+        }
+        if (is_file($js_path)) {
+            wp_enqueue_script('tuankhang-home', get_theme_file_uri('/assets/dist/home.min.js'), array(), (string) filemtime($js_path), array('in_footer' => true, 'strategy' => 'defer'));
+        }
+        return;
+    }
+
+    wp_deregister_script('jquery');
+    wp_register_script('jquery', 'https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js', array(), '1.11.1', false);
+    wp_enqueue_script('jquery');
+}
+add_action('wp_enqueue_scripts', 'tuankhang_enqueue_frontend_assets', 1);
+
+function tuankhang_prune_home_assets()
+{
+    if (!is_front_page()) {
+        return;
+    }
+
+    $style_handles = array('contact-form-7', 'wp-pagenavi', 'wpm-main');
+    $script_handles = array('jquery', 'jquery-core', 'jquery-migrate', 'contact-form-7', 'wpcf7-recaptcha', 'wpm-switcher-block-script');
+    foreach ($style_handles as $handle) {
+        wp_dequeue_style($handle);
+        wp_deregister_style($handle);
+    }
+    foreach ($script_handles as $handle) {
+        wp_dequeue_script($handle);
+        wp_deregister_script($handle);
+    }
+}
+add_action('wp_enqueue_scripts', 'tuankhang_prune_home_assets', 999);
+add_image_size('image-cat-trangchu', 274, 240, true);
+function remove_max_srcset_image_width($max_width)
+{
+    return is_front_page() ? $max_width : false;
+}
+
+function removeHeadLinks()
+{
+    remove_action('wp_head', 'rsd_link');
+    remove_action('wp_head', 'wlwmanifest_link');
+}
+
+add_action('init', 'removeHeadLinks');
+remove_action('wp_head', 'wp_generator');
+
+// Declare sidebar widget zone
+if (function_exists('register_sidebar')) {
+    register_sidebar(array(
+        'name' => 'Sidebar Widgets',
+        'id' => 'sidebar-widgets',
+        'description' => 'These are widgets for the sidebar.',
+        'before_widget' => '<div id="%1$s" class="widget %2$s">',
+        'after_widget' => '</div>',
+        'before_title' => '<h2>',
+        'after_title' => '</h2>'
+    ));
+}
+add_filter('use_block_editor_for_post', '__return_false');
+function mySearchFilter($query)
+{
+    $post_type = isset($_GET['type']) && is_string($_GET['type'])
+        ? sanitize_key(wp_unslash($_GET['type']))
+        : '';
+    if (!$post_type || !post_type_exists($post_type)) {
+        $post_type = 'san-pham';
+    }
+    if ($query->is_search) {
+        $query->set('post_type', $post_type);
+    };
+    return $query;
+}
+
+;
+add_filter('pre_get_posts', 'mySearchFilter');
+function remove_cpt_slug($post_link, $post, $leavename)
+{
+    //Get all the Custom Post Types
+    $args = array(
+        'public' => true, //Only the Public CPTs
+        '_builtin' => false); //Exclude Built-in Post Types (Posts and Pages)
+    $cpts = get_post_types($args, 'objects');
+    foreach ($cpts as $cpt) {
+        //Replace the slug
+        $post_link = str_replace('/' . $post->post_type . '/', '/', $post_link . '.html');
+    }
+    return $post_link;
+}
+
+//add_filter('post_type_link', 'remove_cpt_slug', 10, 3);
+function include_cpt_query($query)
+{
+    // Only loop the main query
+    if (!$query->is_main_query())
+        return;
+    // Only loop our very specific rewrite rule match
+    if (2 != count($query->query) || !isset($query->query['page'])) {
+        return;
+    }
+    // 'name' will be set if post permalinks are just post_name, otherwise the page rule will match
+    if (!empty($query->query['name'])) {
+        $query->set('post_type', get_post_types());
+    }
+}
+
+add_action('pre_get_posts', 'include_cpt_query');
+
+function attachment_image_link_remove_filter($content)
+{
+    $content =
+        preg_replace(
+            array('{<a[^>]*><img}', '{/></a>}'),
+            array('<img', '/>'),
+            $content
+        );
+    return $content;
+}
+
+add_filter('the_content', 'attachment_image_link_remove_filter');
+add_filter('max_srcset_image_width', 'remove_max_srcset_image_width');
+function wdo_disable_srcset($sources)
+{
+    return is_front_page() ? $sources : false;
+}
+
+add_filter('wp_calculate_image_srcset', 'wdo_disable_srcset');
+add_action('admin_init', 'hide_editor');
+function hide_editor()
+{
+    // Get the Post ID.
+    $post_id = $_GET['post'] ? $_GET['post'] : $_POST['post_ID'];
+    if (!isset($post_id)) return;
+    // Hide the editor on a page with a specific page template
+    // Get the name of the Page Template file.
+    $template_file = get_post_meta($post_id, '_wp_page_template', true);
+    if ($template_file == 'page-caidat.php') { // the filename of the page template
+        remove_post_type_support('page', 'editor');
+    }
+}
+
+function custom_admin_css_dinh()
+{
+    echo '<style type="text/css">
+           body.wp-admin .wpt-image {margin-top: 70px !important;overflow: hidden;}
+           body.wp-admin .wpt-image .wpt-form-item-textfield {float: right;width: 72%;margin-top:20px}
+           body.wp-admin .wpt-image .wpt-file-preview {float: left; width: 25%;}
+           body.wp-admin .wpt-image .wpt-file-preview img {height: auto;width: 100%;}
+           .postbox-header .handle-actions {display: none !important;}
+         </style>';
+}
+
+add_action('admin_head', 'custom_admin_css_dinh');
+
+include(get_theme_file_path() . '/inc/customhtmlmenu.php');
+
+?>
