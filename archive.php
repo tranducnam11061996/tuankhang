@@ -1,55 +1,21 @@
-<?php get_header(); ?>
-
-	<section id="body">
-				<div id="product" class="page-body">
-       
-	<section class="bl-top-header">
-		<div class="uk-container uk-container-center">
-			<div class="bl-head">
-				<h1 class="heading-1"><?php single_cat_title(); ?></h1>
-			</div>
-
-		</div>
-	</section><!-- bl-top-header -->
-	<section class="bl-main-body">
-		<div class="uk-container uk-container-center">
-			<div class="uk-grid uk-grid-medium">
-                   
-<?php get_sidebar(); ?>    
-    
-				<div class="uk-width-large-3-4 uk-width-medium-3-4 uk-width-small-1-1">
-
-							<div class="bl-panel-head">
-								<h2 class="heading-1"><?php single_cat_title(); ?> :</h2>
-								<div class="prd-body-head"></div>
-							</div>
-<?php if (have_posts()) : ?>                  
-<?php while (have_posts()) : the_post(); ?>  
-<div class="bl-panel-body">
-	<div class="uk-grid uk-grid-small">
-		<div class="uk-width-large-2-5 uk-width-medium-2-5 uk-width-small-1-2">
-			<div class="bl-thumb img-scaledown">
-				<a href="<?php the_permalink(); ?>"><?php the_post_thumbnail(); ?></a>
-			</div>
-		</div>
-		<div class="uk-width-large-3-5 uk-width-medium-3-5 uk-width-small-1-2">
-			<div class="bl-description">
-				<div class="des-head"><a href="<?php the_permalink(); ?>" title="<?php the_title(); ?>"><?php the_title(); ?></a></div>
-				<p><?php echo esc_html(wp_trim_words(get_the_excerpt(), 50, '…')); ?></p>
-			</div>
-		</div>
-	</div>
-</div>
-<?php endwhile; wp_reset_postdata();?>
-<?php endif; ?>
-<div class="main-pagination">
-<?php if(function_exists('wp_pagenavi')) { wp_pagenavi();} ?>
-</div>	
-            </div>
-			</div>
-		</div>
-	</section><!-- bl-main-body -->
-</div>    
-	</section><!-- #body -->
-
+<?php
+get_header();
+$title = tk_content_title();
+tk_site_banner($title, tk_content_breadcrumbs());
+tk_content_sidebar_drawer();
+?>
+<main id="main-content" class="py-10 md:py-14">
+    <div class="tk-container">
+        <?php tk_content_sidebar_button(); ?>
+        <div class="grid gap-8 lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-10">
+            <aside class="hidden lg:block" aria-label="<?php echo esc_attr(tk_site_text('Chuyên mục tin tức', 'News categories')); ?>"><?php tk_content_sidebar(); ?></aside>
+            <section class="min-w-0" aria-labelledby="archive-heading">
+                <h2 id="archive-heading" class="mb-7 border-b border-slate-200 pb-4 text-2xl font-bold uppercase leading-tight text-primary md:text-[28px]"><?php echo esc_html($title); ?></h2>
+                <?php if (have_posts()) : $card_index = 0; while (have_posts()) : the_post(); tk_content_post_card(get_the_ID(), false, $card_index++ === 0); endwhile; tk_content_pagination(); else : ?>
+                    <div class="rounded-xl bg-slate-50 p-8 text-center text-slate-600"><?php echo esc_html(tk_site_text('Chưa có bài viết trong chuyên mục này.', 'There are no posts in this category yet.')); ?></div>
+                <?php endif; ?>
+            </section>
+        </div>
+    </div>
+</main>
 <?php get_footer(); ?>

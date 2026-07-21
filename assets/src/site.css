@@ -1,7 +1,9 @@
 @import "tailwindcss" source(none);
-@source "../../header-home.php";
-@source "../../footer-home.php";
+@source "../../header.php";
+@source "../../footer.php";
 @source "../../inc/home-tailwind.php";
+@source "../../inc/content-tailwind.php";
+@source "../../searchform.php";
 
 @theme {
   --color-primary: #013974;

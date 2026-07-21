@@ -4,65 +4,22 @@ if (function_exists('tk_is_product_search') && tk_is_product_search()) {
     return;
 }
 get_header();
+$title = tk_content_title();
+tk_site_banner($title, tk_content_breadcrumbs());
+tk_content_sidebar_drawer();
 ?>
-
-
-	<section id="body">
-				<div id="product" class="page-body">
-     
-	<section class="bl-top-header">
-		<div class="uk-container uk-container-center">
-			<div class="bl-head">
-				<h1 class="heading-1"><?php esc_html_e("Kết quả tìm kiếm", "tuankhang"); ?></h1>
-			</div>
-			<div class="bl-breadcrumb">
-				<ul class="uk-list uk-clearfix">
-					<li><a href="<?php echo get_home_url(); ?>" title="<?php esc_html_e("Trang Chủ", "tuankhang"); ?>"><?php esc_html_e("Trang Chủ", "tuankhang"); ?></a></li>
-						<li class="bl-active"><?php esc_html_e("Kết quả tìm kiếm", "tuankhang"); ?></li>
-					</ul>
-			</div>
-		</div>
-	</section><!-- bl-top-header -->
-	<section class="bl-main-body">
-		<div class="uk-container uk-container-center">
-			<div class="uk-grid uk-grid-medium">
-                   
-<?php get_sidebar(); ?>    
-    
-				<div class="uk-width-large-3-4 uk-width-medium-3-4 uk-width-small-1-1">
-
-							<div class="bl-panel-head">
-								<h2 class="heading-1"><?php esc_html_e("Kết quả tìm kiếm cho từ khóa", "tuankhang"); ?> : <strong><i>" <?php echo wp_specialchars($s); ?> "</i></strong></h2>
-								<div class="prd-body-head"></div>
-							</div>
-							<div class="main-prod">
-									<div class="uk-grid uk-grid-small mt20">
-                                    
-                                    
-<?php if (have_posts()) : while (have_posts()) : the_post(); ?>
-<?php include (TEMPLATEPATH . '/inc/1sanpham.php' ); ?> 
-<?php endwhile; wp_reset_postdata();?> 
-<?php endif; ?> 
-                                            
-                                            
-                                            
-                                            
-                                   </div>
-							</div><!-- main-prod -->
-                            
-<div class="main-pagination">
-<?php if(function_exists('wp_pagenavi')) { wp_pagenavi();} ?>
-</div>	       
-            
-            </div><!-- uk-width-large-3-4 uk-width-medium-3-4 uk-width-small-1-1 -->
-			</div>
-		</div>
-	</section><!-- bl-main-body -->
-    
-    
-    
-</div>    
-	</section><!-- #body -->
-
-
+<main id="main-content" class="py-10 md:py-14">
+    <div class="tk-container">
+        <?php tk_content_sidebar_button(); ?>
+        <div class="grid gap-8 lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-10">
+            <aside class="hidden lg:block" aria-label="<?php echo esc_attr(tk_site_text('Chuyên mục tin tức', 'News categories')); ?>"><?php tk_content_sidebar(); ?></aside>
+            <section class="min-w-0" aria-labelledby="search-heading">
+                <h2 id="search-heading" class="mb-7 border-b border-slate-200 pb-4 text-2xl font-bold uppercase leading-tight text-primary md:text-[28px]"><?php echo esc_html($title); ?></h2>
+                <?php if (have_posts()) : $card_index = 0; while (have_posts()) : the_post(); tk_content_post_card(get_the_ID(), false, $card_index++ === 0); endwhile; tk_content_pagination(); else : ?>
+                    <div class="rounded-xl bg-slate-50 p-8 text-center"><p><?php echo esc_html(tk_site_text('Không tìm thấy kết quả phù hợp.', 'No matching results were found.')); ?></p><div class="mx-auto mt-5 max-w-xl"><?php get_search_form(); ?></div></div>
+                <?php endif; ?>
+            </section>
+        </div>
+    </div>
+</main>
 <?php get_footer(); ?>

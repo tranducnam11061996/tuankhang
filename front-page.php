@@ -1,5 +1,5 @@
 <?php
-get_header('home');
+get_header();
 $fields = tk_home_fields();
 $company_name = tk_home_text('Công ty TNHH Dược và Thiết bị y tế Tuấn Khang', 'Tuan Khang Pharmaceutical and Medical Equipment Co., Ltd.');
 $read_more = tk_home_text('Xem thêm', 'Learn more');
@@ -156,4 +156,4 @@ function tk_render_home_mosaic($items, $read_more)
     <?php endif; ?>
 </main>
 
-<?php get_footer('home'); ?>
+<?php get_footer(); ?>

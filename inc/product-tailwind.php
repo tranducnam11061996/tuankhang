@@ -107,40 +107,7 @@ function tk_product_breadcrumbs($post_id = 0)
 
 function tk_product_banner($title, $breadcrumbs)
 {
-    $fallback = get_theme_file_uri('/image/background-head-about.png');
-    $widths = array(480, 768, 1200, 1702);
-    $sources = array('avif' => array(), 'webp' => array());
-    foreach ($sources as $format => $unused) {
-        foreach ($widths as $width) {
-            $relative = 'assets/dist/images/products/banner-' . $width . '.' . $format;
-            if (is_file(get_theme_file_path($relative))) {
-                $sources[$format][] = get_theme_file_uri($relative) . ' ' . $width . 'w';
-            }
-        }
-    }
-    ?>
-    <section class="relative isolate flex min-h-[200px] items-center overflow-hidden bg-slate-500 text-white md:min-h-[250px]" aria-labelledby="product-page-title">
-        <picture class="absolute inset-0 -z-20 h-full w-full">
-            <?php if ($sources['avif']) : ?><source type="image/avif" srcset="<?php echo esc_attr(implode(', ', $sources['avif'])); ?>" sizes="100vw"><?php endif; ?>
-            <?php if ($sources['webp']) : ?><source type="image/webp" srcset="<?php echo esc_attr(implode(', ', $sources['webp'])); ?>" sizes="100vw"><?php endif; ?>
-            <img src="<?php echo esc_url($fallback); ?>" width="2000" height="1333" class="h-full w-full object-cover" alt="" loading="eager" decoding="async" fetchpriority="high">
-        </picture>
-        <div class="absolute inset-0 -z-10 bg-slate-900/45"></div>
-        <div class="tk-container py-12 text-center md:py-16">
-            <h1 id="product-page-title" class="text-2xl font-bold uppercase leading-tight tracking-wide md:text-[30px]"><?php echo esc_html($title); ?></h1>
-            <nav class="mt-5 overflow-x-auto pb-1 md:mt-8 md:overflow-visible md:pb-0" aria-label="<?php echo esc_attr(tk_home_text('Đường dẫn trang', 'Breadcrumb')); ?>">
-                <ol class="flex w-max flex-nowrap items-center justify-start gap-x-3 text-sm md:w-auto md:flex-wrap md:justify-center md:gap-y-2 md:text-xl">
-                    <?php foreach ($breadcrumbs as $index => $item) : ?>
-                        <li class="flex items-center gap-3 whitespace-nowrap">
-                            <?php if ($index > 0) : ?><svg class="size-4 shrink-0" aria-hidden="true" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L10.94 10 7.23 6.29a.75.75 0 011.06-1.06l4.24 4.24a.75.75 0 010 1.06l-4.24 4.24a.75.75 0 01-1.08 0z" clip-rule="evenodd"/></svg><?php endif; ?>
-                            <?php if (!empty($item['url']) && !is_wp_error($item['url'])) : ?><a class="transition hover:text-blue-100 hover:underline" href="<?php echo esc_url($item['url']); ?>"><?php echo esc_html($item['label']); ?></a><?php else : ?><span aria-current="page"><?php echo esc_html($item['label']); ?></span><?php endif; ?>
-                        </li>
-                    <?php endforeach; ?>
-                </ol>
-            </nav>
-        </div>
-    </section>
-    <?php
+    tk_site_banner($title, $breadcrumbs);
 }
 
 function tk_product_category_tree($nodes, $instance = 'desktop', $depth = 0)
@@ -281,28 +248,3 @@ function tk_product_related_ids($post_id, $limit = 4)
 
     return array_slice(array_values(array_unique($ids)), 0, $limit);
 }
-
-function tk_product_preload_banner()
-{
-    if (!tk_is_product_tailwind_context()) {
-        return;
-    }
-    $fallback = get_theme_file_uri('/image/background-head-about.png');
-    $preload_href = $fallback;
-    $srcset = array();
-    foreach (array(480, 768, 1200, 1702) as $width) {
-        $relative = 'assets/dist/images/products/banner-' . $width . '.avif';
-        if (is_file(get_theme_file_path($relative))) {
-            $srcset[] = get_theme_file_uri($relative) . ' ' . $width . 'w';
-            if ($width === 1200) {
-                $preload_href = get_theme_file_uri($relative);
-            }
-        }
-    }
-    echo '<link rel="preload" as="image" href="' . esc_url($preload_href) . '"';
-    if ($srcset) {
-        echo ' imagesrcset="' . esc_attr(implode(', ', $srcset)) . '" imagesizes="100vw" type="image/avif"';
-    }
-    echo ' fetchpriority="high">' . "\n";
-}
-add_action('wp_head', 'tk_product_preload_banner', 2);

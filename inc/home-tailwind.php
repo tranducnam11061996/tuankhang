@@ -185,6 +185,9 @@ function tk_home_slot_config($slot)
         'product-thumb' => array('widths' => array(160, 320), 'sizes' => '88px', 'directory' => 'products'),
         'product-card' => array('widths' => array(320, 480, 768), 'sizes' => '(min-width: 1024px) 220px, (min-width: 480px) 50vw, 100vw', 'directory' => 'products'),
         'product-detail' => array('widths' => array(480, 768, 1024), 'sizes' => '(min-width: 1024px) 460px, 100vw', 'directory' => 'products'),
+        'post-thumb' => array('widths' => array(160, 320), 'sizes' => '88px', 'directory' => 'content'),
+        'post-card' => array('widths' => array(320, 480, 768), 'sizes' => '(min-width: 1024px) 340px, (min-width: 640px) 40vw, 100vw', 'directory' => 'content'),
+        'page-content' => array('widths' => array(480, 768, 1200), 'sizes' => '(min-width: 1024px) 850px, calc(100vw - 32px)', 'directory' => 'content'),
     );
     return $configs[$slot] ?? $configs['news'];
 }

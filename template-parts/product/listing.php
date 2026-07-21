@@ -4,7 +4,7 @@ if (!defined('ABSPATH')) {
 }
 
 $title = tk_product_listing_title();
-get_header('home');
+get_header();
 ?>
 <main id="main-content">
     <?php tk_product_banner($title, tk_product_breadcrumbs()); ?>
@@ -57,4 +57,4 @@ get_header('home');
     <?php tk_product_sidebar('mobile'); ?>
 </aside>
 
-<?php get_footer('home'); ?>
+<?php get_footer(); ?>

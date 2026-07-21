@@ -17,7 +17,7 @@ if (existsSync(phpRoot)) {
 const php = candidates.find((candidate) => existsSync(candidate));
 if (!php) throw new Error('Không tìm thấy PHP CLI. Đặt biến TK_PHP tới php.exe rồi chạy lại.');
 
-for (const script of ['build-home-images.php', 'build-product-images.php']) {
+for (const script of ['build-home-images.php', 'build-product-images.php', 'build-content-images.php']) {
   const result = spawnSync(php, [resolve('scripts', script)], { cwd: resolve('.'), stdio: 'inherit' });
   if (result.status !== 0) process.exit(result.status ?? 1);
 }

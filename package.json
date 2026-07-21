@@ -2,12 +2,13 @@
   "name": "tuankhang-theme",
   "private": true,
   "scripts": {
-    "dev": "concurrently -n site,home,products \"npm:dev:site\" \"npm:dev:home\" \"npm:dev:products\"",
+    "dev": "concurrently -n site,home,products,content \"npm:dev:site\" \"npm:dev:home\" \"npm:dev:products\" \"npm:dev:content\"",
     "dev:site": "tailwindcss -i ./assets/src/site.css -o ./assets/dist/site.min.css --watch",
     "dev:home": "tailwindcss -i ./assets/src/home.css -o ./assets/dist/home.min.css --watch",
     "dev:products": "tailwindcss -i ./assets/src/products.css -o ./assets/dist/products.min.css --watch",
-    "build:css": "tailwindcss -i ./assets/src/site.css -o ./assets/dist/site.min.css --minify && tailwindcss -i ./assets/src/home.css -o ./assets/dist/home.min.css --minify && tailwindcss -i ./assets/src/products.css -o ./assets/dist/products.min.css --minify",
-    "build:js": "esbuild ./assets/src/site.js --bundle --minify --target=es2020 --outfile=./assets/dist/site.min.js && esbuild ./assets/src/home.js --bundle --minify --target=es2020 --outfile=./assets/dist/home.min.js && esbuild ./assets/src/products.js --bundle --minify --target=es2020 --outfile=./assets/dist/products.min.js",
+    "dev:content": "tailwindcss -i ./assets/src/content.css -o ./assets/dist/content.min.css --watch",
+    "build:css": "tailwindcss -i ./assets/src/site.css -o ./assets/dist/site.min.css --minify && tailwindcss -i ./assets/src/home.css -o ./assets/dist/home.min.css --minify && tailwindcss -i ./assets/src/products.css -o ./assets/dist/products.min.css --minify && tailwindcss -i ./assets/src/content.css -o ./assets/dist/content.min.css --minify",
+    "build:js": "esbuild ./assets/src/site.js --bundle --minify --target=es2020 --outfile=./assets/dist/site.min.js && esbuild ./assets/src/home.js --bundle --minify --target=es2020 --outfile=./assets/dist/home.min.js && esbuild ./assets/src/products.js --bundle --minify --target=es2020 --outfile=./assets/dist/products.min.js && esbuild ./assets/src/content.js --bundle --minify --target=es2020 --outfile=./assets/dist/content.min.js",
     "build:images": "node ./scripts/build-images.mjs",
     "build": "npm run build:css && npm run build:js && npm run build:images"
   },

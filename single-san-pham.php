@@ -1,8 +1,8 @@
 <?php
-get_header('home');
+get_header();
 
 if (!have_posts()) {
-    get_footer('home');
+    get_footer();
     return;
 }
 
@@ -107,4 +107,4 @@ $related_ids = tk_product_related_ids($product_id, 4);
     </a>
 </div>
 
-<?php get_footer('home'); ?>
+<?php get_footer(); ?>
