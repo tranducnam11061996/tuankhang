@@ -35,7 +35,7 @@
 		<div class="uk-width-large-3-5 uk-width-medium-3-5 uk-width-small-1-2">
 			<div class="bl-description">
 				<div class="des-head"><a href="<?php the_permalink(); ?>" title="<?php the_title(); ?>"><?php the_title(); ?></a></div>
-				<p><?php the_content_rss('', TRUE, '', 50); ?></p>
+				<p><?php echo esc_html(wp_trim_words(get_the_excerpt(), 50, '…')); ?></p>
 			</div>
 		</div>
 	</div>

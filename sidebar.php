@@ -60,7 +60,7 @@ while($indexx->have_posts()) : $indexx->the_post();?>
 <div class="uk-grid uk-grid-small">
 	<div class="uk-width-large-1-2">
 		<div class="as-thumb img-scaledown">
-			<?php echo get_the_post_thumbnail($page->ID, 'medium'); ?> 
+			<?php echo get_the_post_thumbnail(get_the_ID(), 'medium'); ?>
 		</div>
 	</div>
 	<div class="uk-width-large-1-2">

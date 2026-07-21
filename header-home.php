@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <?php wp_head(); ?>
 </head>
-<body <?php body_class('tk-home'); ?>>
+<body <?php body_class('tk-tailwind'); ?>>
 <?php wp_body_open(); ?>
 <?php
 $home_menu = tk_home_menu_tree(25);
@@ -51,8 +51,8 @@ $company_name = tk_home_text('Công ty TNHH Dược và Thiết bị y tế Tu�
                     </button>
                     <div class="tk-dropdown-panel w-80">
                         <form role="search" action="<?php echo esc_url(home_url('/')); ?>" method="get" class="flex gap-2">
-                            <label for="home-search" class="sr-only"><?php echo esc_html(tk_home_text('Từ khóa tìm kiếm', 'Search keywords')); ?></label>
-                            <input id="home-search" name="s" type="search" class="min-h-11 min-w-0 flex-1 rounded-lg border border-slate-300 px-3 text-slate-800" placeholder="<?php echo esc_attr(tk_home_text('Nhập từ khóa...', 'Enter keywords...')); ?>">
+                            <label for="site-search" class="sr-only"><?php echo esc_html(tk_home_text('Từ khóa tìm kiếm', 'Search keywords')); ?></label>
+                            <input id="site-search" name="s" type="search" class="min-h-11 min-w-0 flex-1 rounded-lg border border-slate-300 px-3 text-slate-800" placeholder="<?php echo esc_attr(tk_home_text('Nhập từ khóa...', 'Enter keywords...')); ?>">
                             <button class="min-h-11 rounded-lg bg-button px-4 font-bold text-white" type="submit"><?php echo esc_html(tk_home_text('Tìm', 'Search')); ?></button>
                         </form>
                     </div>
@@ -72,7 +72,7 @@ $company_name = tk_home_text('Công ty TNHH Dược và Thiết bị y tế Tu�
         </div>
 
         <div class="tk-container flex min-h-[72px] items-center justify-between lg:hidden">
-            <button type="button" data-menu-open aria-controls="home-mobile-menu" aria-expanded="false" class="flex size-11 items-center justify-center rounded-lg text-primary" aria-label="<?php echo esc_attr(tk_home_text('Mở menu', 'Open menu')); ?>">
+            <button type="button" data-menu-open aria-controls="site-mobile-menu" aria-expanded="false" class="flex size-11 items-center justify-center rounded-lg text-primary" aria-label="<?php echo esc_attr(tk_home_text('Mở menu', 'Open menu')); ?>">
                 <svg class="size-7" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
             </button>
             <a href="<?php echo esc_url(home_url('/')); ?>" aria-label="<?php echo esc_attr($company_name); ?>">
@@ -86,7 +86,7 @@ $company_name = tk_home_text('Công ty TNHH Dược và Thiết bị y tế Tu�
 </header>
 
 <div data-menu-overlay class="tk-overlay fixed inset-0 z-50 bg-slate-950/55 lg:hidden"></div>
-<aside id="home-mobile-menu" data-menu-drawer aria-hidden="true" inert class="tk-drawer fixed inset-y-0 left-0 z-[60] w-[min(88vw,360px)] overflow-y-auto bg-white p-5 shadow-2xl lg:hidden">
+<aside id="site-mobile-menu" data-menu-drawer aria-hidden="true" inert class="tk-drawer fixed inset-y-0 left-0 z-[60] w-[min(88vw,360px)] overflow-y-auto bg-white p-5 shadow-2xl lg:hidden">
     <div class="mb-5 flex items-center justify-between border-b border-slate-200 pb-4">
         <img src="<?php echo esc_url(tk_home_logo()); ?>" width="200" height="139" class="h-14 w-auto" alt="<?php echo esc_attr($company_name); ?>">
         <button type="button" data-menu-close class="flex size-11 items-center justify-center rounded-lg text-primary" aria-label="<?php echo esc_attr(tk_home_text('Đóng menu', 'Close menu')); ?>">

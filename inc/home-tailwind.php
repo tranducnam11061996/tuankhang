@@ -176,17 +176,20 @@ function tk_home_image_data($image)
 function tk_home_slot_config($slot)
 {
     $configs = array(
-        'hero' => array('widths' => array(480, 768, 1280, 1702), 'sizes' => '100vw'),
-        'story' => array('widths' => array(480, 768, 1024), 'sizes' => '(min-width: 768px) 50vw, 100vw'),
-        'news' => array('widths' => array(480, 768, 1024), 'sizes' => '(min-width: 1024px) 40vw, (min-width: 640px) 50vw, 100vw'),
-        'product' => array('widths' => array(320, 480, 768), 'sizes' => '(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw'),
-        'project' => array('widths' => array(320, 480, 768), 'sizes' => '(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw'),
-        'partner' => array('widths' => array(160, 320), 'sizes' => '160px'),
+        'hero' => array('widths' => array(480, 768, 1280, 1702), 'sizes' => '100vw', 'directory' => 'home'),
+        'story' => array('widths' => array(480, 768, 1024), 'sizes' => '(min-width: 768px) 50vw, 100vw', 'directory' => 'home'),
+        'news' => array('widths' => array(480, 768, 1024), 'sizes' => '(min-width: 1024px) 40vw, (min-width: 640px) 50vw, 100vw', 'directory' => 'home'),
+        'product' => array('widths' => array(320, 480, 768), 'sizes' => '(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw', 'directory' => 'home'),
+        'project' => array('widths' => array(320, 480, 768), 'sizes' => '(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw', 'directory' => 'home'),
+        'partner' => array('widths' => array(160, 320), 'sizes' => '160px', 'directory' => 'home'),
+        'product-thumb' => array('widths' => array(160, 320), 'sizes' => '88px', 'directory' => 'products'),
+        'product-card' => array('widths' => array(320, 480, 768), 'sizes' => '(min-width: 1024px) 220px, (min-width: 480px) 50vw, 100vw', 'directory' => 'products'),
+        'product-detail' => array('widths' => array(480, 768, 1024), 'sizes' => '(min-width: 1024px) 460px, 100vw', 'directory' => 'products'),
     );
     return $configs[$slot] ?? $configs['news'];
 }
 
-function tk_home_picture($image, $slot, $args = array())
+function tk_picture($image, $slot, $args = array())
 {
     $data = tk_home_image_data($image);
     if (!$data['url']) {
@@ -208,7 +211,7 @@ function tk_home_picture($image, $slot, $args = array())
                 if ($candidate > $width && count($config['widths']) > 1) {
                     continue;
                 }
-                $relative = 'assets/dist/images/home/' . $data['id'] . '-' . $candidate . '.' . $format;
+                $relative = 'assets/dist/images/' . $config['directory'] . '/' . $data['id'] . '-' . $candidate . '.' . $format;
                 if (file_exists(get_theme_file_path($relative))) {
                     $sources[$format][] = get_theme_file_uri($relative) . ' ' . $candidate . 'w';
                 }
@@ -247,6 +250,11 @@ function tk_home_picture($image, $slot, $args = array())
     }
     $html .= '></picture>';
     return $html;
+}
+
+function tk_home_picture($image, $slot, $args = array())
+{
+    return tk_picture($image, $slot, $args);
 }
 
 function tk_home_preload_hero()

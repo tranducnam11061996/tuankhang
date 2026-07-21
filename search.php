@@ -1,4 +1,10 @@
-<?php get_header(); ?>
+<?php
+if (function_exists('tk_is_product_search') && tk_is_product_search()) {
+    get_template_part('template-parts/product/listing');
+    return;
+}
+get_header();
+?>
 
 
 	<section id="body">

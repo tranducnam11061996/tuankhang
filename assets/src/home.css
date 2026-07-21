@@ -1,8 +1,7 @@
-@import "tailwindcss" source(none);
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme" layer(theme);
+@import "tailwindcss/utilities" layer(utilities) source(none);
 @source "../../front-page.php";
-@source "../../header-home.php";
-@source "../../footer-home.php";
-@source "../../inc/home-tailwind.php";
 
 @theme {
   --color-primary: #013974;
@@ -15,55 +14,15 @@
   --shadow-card: 0 8px 24px rgb(1 57 116 / 10%);
 }
 
-@layer base {
-  html { scroll-behavior: smooth; }
-  body { @apply m-0 overflow-x-hidden bg-white font-sans text-[15px] leading-6 text-slate-700 antialiased; }
-  img { @apply block max-w-full; }
-  button, a, input { @apply focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary; }
-  button { font: inherit; }
-}
-
-@layer components {
-  .tk-container { @apply mx-auto w-full max-w-[1200px] px-4 sm:px-6; }
-  .tk-section { @apply py-12 md:py-16; }
-  .tk-title { @apply text-center text-2xl font-bold uppercase leading-tight text-primary md:text-[30px]; }
-  .tk-title::after { content: ""; @apply mx-auto mt-3 block h-1 w-14 rounded-full bg-accent; }
-  .tk-btn { @apply inline-flex min-h-11 items-center justify-center rounded-full bg-button px-6 py-2.5 text-sm font-bold uppercase text-white transition hover:bg-primary; }
-  .tk-card { @apply overflow-hidden rounded-card bg-white shadow-card; }
-  .tk-card-image { @apply aspect-[16/10] w-full overflow-hidden bg-slate-100; }
-  .tk-card-image img { @apply h-full w-full object-cover transition duration-500; }
-  .tk-card:hover .tk-card-image img { @apply scale-[1.03]; }
-  .tk-dropdown-panel { @apply invisible absolute right-0 top-full z-50 mt-2 translate-y-1 rounded-lg bg-white p-3 opacity-0 shadow-xl transition; }
-  [data-dropdown][data-open="true"] .tk-dropdown-panel { @apply visible translate-y-0 opacity-100; }
-  .tk-menu-item { @apply relative flex min-h-11 items-center; }
-  .tk-menu-link { @apply inline-flex min-h-11 items-center px-3 text-sm font-bold uppercase text-primary transition hover:text-accent; }
-  .tk-submenu { @apply invisible absolute left-0 top-full z-50 min-w-60 translate-y-1 rounded-b-lg border-t-2 border-accent bg-white py-2 opacity-0 shadow-xl transition; }
-  .tk-menu-item:hover > .tk-submenu, .tk-menu-item:focus-within > .tk-submenu { @apply visible translate-y-0 opacity-100; }
-  .tk-submenu .tk-menu-link { @apply w-full justify-between px-4 py-2 font-normal normal-case; }
-  .tk-submenu .tk-submenu { @apply left-full top-0; }
-}
-
 .tk-hero-slide { position: absolute; inset: 0; opacity: 0; pointer-events: none; transition: opacity .6s ease; }
 .tk-hero-slide[data-active="true"] { opacity: 1; pointer-events: auto; }
 .tk-hero-slide picture, .tk-hero-slide img { width: 100%; height: 100%; }
 .tk-hero-slide img { object-fit: cover; }
-.tk-drawer { transform: translateX(-100%); transition: transform .25s ease; }
-.tk-overlay { opacity: 0; visibility: hidden; transition: opacity .25s ease, visibility .25s ease; }
-body.tk-menu-open { overflow: hidden; }
-body.tk-menu-open .tk-drawer { transform: translateX(0); }
-body.tk-menu-open .tk-overlay { opacity: 1; visibility: visible; }
 .tk-partner-track { width: max-content; animation: tk-partners 32s linear infinite; }
 .tk-partner-track:hover, .tk-partner-track:focus-within { animation-play-state: paused; }
 @keyframes tk-partners { to { transform: translateX(-50%); } }
-@media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
-  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
-  .tk-partner-track { animation: none; }
-}
+@media (prefers-reduced-motion: reduce) { .tk-partner-track { animation: none; } }
 
-.tk-language-list ul { margin: 0; padding: 0; list-style: none; }
-.tk-language-list a { display: block; min-height: 40px; padding: 8px 12px; color: #013974; white-space: nowrap; }
-.tk-language-list a:hover, .tk-language-list a:focus { background: #f1f5f9; }
 .tk-richtext p { margin-bottom: .85rem; }
 .tk-richtext p:last-child { margin-bottom: 0; }
 .tk-richtext ul { margin: .75rem 0; padding-left: 1.25rem; list-style: disc; }
