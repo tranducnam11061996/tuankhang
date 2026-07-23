@@ -1,159 +1,267 @@
 <?php
 get_header();
-$fields = tk_home_fields();
+
 $company_name = tk_home_text('Công ty TNHH Dược và Thiết bị y tế Tuấn Khang', 'Tuan Khang Pharmaceutical and Medical Equipment Co., Ltd.');
-$read_more = tk_home_text('Xem thêm', 'Learn more');
+$read_more = tk_home_text('Xem chi tiết', 'View details');
+$view_all = tk_home_text('Xem tất cả', 'View all');
+$hotline = (string) tk_site_field('wpcf-so-hotline');
 
-$news = array();
-$systems = array();
-$products = array();
-$projects = array();
-$partners = array();
-for ($i = 1; $i <= 5; $i++) {
-    $news[] = array('image' => tk_home_field('duytv_news_image_' . $i), 'title' => tk_home_field('duytv_news_title_' . $i), 'link' => tk_home_url(tk_home_field('duytv_news_link_' . $i)));
-    $systems[] = array('image' => tk_home_field('duytv_system_image_' . $i), 'title' => tk_home_field('duytv_system_title_' . $i), 'link' => tk_home_url(tk_home_field('duytv_system_link_' . $i)));
-}
-for ($i = 1; $i <= 8; $i++) {
-    $products[] = array('image' => tk_home_field('wpcf-anh-san-pham-' . $i), 'title' => tk_home_field('wpcf-ten-hien-thi-san-pham-' . $i), 'link' => tk_home_url(tk_home_field('wpcf-link-lien-ket-san-pham-' . $i)));
-}
-for ($i = 1; $i <= 6; $i++) {
-    $projects[] = array('image' => tk_home_field('wpcf-hinh-anh-du-an-' . $i), 'title' => tk_home_field('wpcf-ten-du-an-' . $i), 'link' => tk_home_url(tk_home_field('wpcf-link-du-an-' . $i, '#')));
-}
-for ($i = 1; $i <= 10; $i++) {
-    $partner = tk_home_field('wpcf-doi-tac-' . $i);
-    if ($partner) $partners[] = $partner;
-}
+$hero = array(
+    'eyebrow' => tk_home_copy('tk_home_hero_eyebrow', 'Hơn một thập kỷ đồng hành cùng bác sĩ nha khoa', 'More than a decade supporting dental professionals'),
+    'title' => tk_home_copy('tk_home_hero_title', 'Nâng chuẩn điều trị nha khoa Việt Nam', 'Advancing dental care in Vietnam'),
+    'description' => tk_home_copy('tk_home_hero_description', 'Tuấn Khang kết nối bác sĩ và phòng khám với thiết bị, vật liệu và hệ thống Implant được tuyển chọn từ những thương hiệu uy tín trên thế giới.', 'Tuan Khang connects dentists and clinics with carefully selected equipment, materials and implant systems from trusted global manufacturers.'),
+    'image' => tk_home_hero_image(),
+    'secondary_image' => tk_home_hero_secondary_image(),
+    'primary_label' => tk_home_copy('tk_home_hero_primary_label', 'Nhận tư vấn chuyên môn', 'Get expert consultation'),
+    'primary_url' => tk_home_url(tk_home_field('tk_home_hero_primary_url'), home_url('/lien-he/')),
+    'secondary_label' => tk_home_copy('tk_home_hero_secondary_label', 'Khám phá sản phẩm', 'Explore products'),
+    'secondary_url' => tk_home_url(tk_home_field('tk_home_hero_secondary_url'), home_url('/san-pham/')),
+);
 
-function tk_render_home_mosaic($items, $read_more)
-{
-    $classes = array(
-        'lg:col-span-2 lg:row-span-2',
-        'lg:col-span-1',
-        'lg:col-span-1',
-        'lg:col-span-1',
-        'lg:col-span-1',
+$metric_defaults = array(
+    array('100000', '+', tk_home_text('Khách hàng', 'Customers')),
+    array('30', '+', tk_home_text('Hãng sản xuất', 'Manufacturers')),
+    array('35', '+', tk_home_text('Container mỗi năm', 'Containers per year')),
+    array('24', '/7', tk_home_text('Hỗ trợ chuyên môn', 'Expert support')),
+    array('12', '+', tk_home_text('Năm kinh nghiệm', 'Years of experience')),
+);
+$metrics = array();
+foreach ($metric_defaults as $index => $default) {
+    $number = $index + 1;
+    $value = trim((string) tk_home_field('tk_home_metric_value_' . $number, $default[0]));
+    $metrics[] = array(
+        'value' => $value !== '' ? $value : $default[0],
+        'target' => (int) preg_replace('/[^0-9]/', '', $value !== '' ? $value : $default[0]),
+        'suffix' => tk_home_copy('tk_home_metric_suffix_' . $number, $default[1], $default[1]),
+        'label' => tk_home_copy('tk_home_metric_label_' . $number, $default[2], $default[2]),
     );
-    foreach ($items as $index => $item) {
-        if (!$item['image'] && !$item['title']) continue;
-        $link = $item['link'] ?: '#';
-        echo '<article class="tk-card group ' . esc_attr($classes[$index] ?? '') . '">';
-        if ($item['image']) {
-            echo '<a href="' . esc_url($link) . '" class="tk-card-image block">' . tk_home_picture($item['image'], 'news', array('alt' => $item['title'], 'class' => 'h-full w-full object-cover')) . '</a>';
-        }
-        echo '<div class="p-5">';
-        if ($item['title']) echo '<h3 class="text-lg font-bold leading-snug text-primary"><a class="transition hover:text-accent" href="' . esc_url($link) . '">' . esc_html($item['title']) . '</a></h3>';
-        if ($item['link']) echo '<a class="mt-3 inline-flex min-h-11 items-center font-bold text-button hover:text-accent" href="' . esc_url($link) . '">' . esc_html($read_more) . ' <span aria-hidden="true" class="ml-2">→</span></a>';
-        echo '</div></article>';
+}
+$hero_proof_indexes = array(4, 1, 3);
+$hero_proofs = array();
+foreach ($hero_proof_indexes as $index) {
+    if (isset($metrics[$index])) {
+        $hero_proofs[] = $metrics[$index];
     }
 }
+
+$partners = array();
+for ($index = 1; $index <= 10; $index++) {
+    $image = tk_home_field('wpcf-doi-tac-' . $index);
+    if ($image) $partners[] = $image;
+}
+
+$values = array();
+$value_icons = array('target', 'mission', 'vision');
+for ($index = 1; $index <= 3; $index++) {
+    $title = tk_home_field('duytv_info_title_' . $index);
+    $description = tk_home_field('duytv_info_des_' . $index);
+    if (!$title && !$description) continue;
+    $values[] = array('title' => $title, 'description' => $description, 'icon' => $value_icons[$index - 1]);
+}
+
+$capability_defaults = array(
+    array(tk_home_text('Danh mục được tuyển chọn', 'Curated portfolio'), tk_home_text('Thiết bị, vật liệu và hệ thống Implant chính hãng từ các nhà sản xuất đã được kiểm chứng.', 'Authentic equipment, materials and implant systems from proven manufacturers.'), home_url('/san-pham/'), 'portfolio'),
+    array(tk_home_text('Hỗ trợ lâm sàng', 'Clinical support'), tk_home_text('Đồng hành cùng bác sĩ từ lựa chọn giải pháp đến hướng dẫn sử dụng và hỗ trợ chuyên môn.', 'Supporting dentists from solution selection through product guidance and clinical assistance.'), home_url('/dich-vu-ho-tro-phau-thuat/'), 'clinical'),
+    array(tk_home_text('Phân phối toàn quốc', 'Nationwide distribution'), tk_home_text('Năng lực cung ứng ổn định cùng hệ thống chi nhánh tại Hà Nội và Thành phố Hồ Chí Minh.', 'Reliable supply supported by branches in Hanoi and Ho Chi Minh City.'), home_url('/lien-he/'), 'distribution'),
+);
+$capabilities = array();
+foreach ($capability_defaults as $index => $default) {
+    $number = $index + 1;
+    $capabilities[] = array(
+        'title' => tk_home_copy('tk_home_capability_title_' . $number, $default[0], $default[0]),
+        'description' => tk_home_copy('tk_home_capability_description_' . $number, $default[1], $default[1]),
+        'link' => tk_home_url(tk_home_field('tk_home_capability_link_' . $number), $default[2]),
+        'icon' => $default[3],
+    );
+}
+
+$systems = array();
+$news = array();
+for ($index = 1; $index <= 5; $index++) {
+    $system = array('image' => tk_home_field('duytv_system_image_' . $index), 'title' => tk_home_field('duytv_system_title_' . $index), 'link' => tk_home_url(tk_home_field('duytv_system_link_' . $index), ''));
+    if ($system['image'] && $system['title'] && count($systems) < 4) $systems[] = $system;
+    $news_item = array('image' => tk_home_field('duytv_news_image_' . $index), 'title' => tk_home_field('duytv_news_title_' . $index), 'link' => tk_home_url(tk_home_field('duytv_news_link_' . $index), ''));
+    if ($news_item['image'] && $news_item['title'] && count($news) < 3) $news[] = $news_item;
+}
+
+$products = array();
+for ($index = 1; $index <= 8; $index++) {
+    $product = array('image' => tk_home_field('wpcf-anh-san-pham-' . $index), 'title' => tk_home_field('wpcf-ten-hien-thi-san-pham-' . $index), 'link' => tk_home_url(tk_home_field('wpcf-link-lien-ket-san-pham-' . $index), ''));
+    if ($product['image'] && $product['title'] && count($products) < 4) $products[] = $product;
+}
+
+$projects = array();
+for ($index = 1; $index <= 6; $index++) {
+    $project = array('image' => tk_home_field('wpcf-hinh-anh-du-an-' . $index), 'title' => tk_home_field('wpcf-ten-du-an-' . $index), 'link' => tk_home_url(tk_home_field('wpcf-link-du-an-' . $index), ''));
+    if ($project['image'] && $project['title'] && count($projects) < 3) $projects[] = $project;
+}
+
+$story_title = tk_home_field('duytv_story_title', tk_home_text('Câu chuyện về Tuấn Khang', 'The Tuan Khang story'));
+$story_content = tk_home_field('duytv_story_content');
+$story_image = tk_home_field('duytv_story_image');
+$story_link = tk_home_url(tk_home_field('duytv_story_link'), home_url('/gioi-thieu/'));
+$capability_image = $hero['secondary_image'] ?: ($news[1]['image'] ?? ($story_image ?: $hero['image']));
+$final_cta = array(
+    'title' => tk_home_copy('tk_home_cta_title', 'Cùng Tuấn Khang lựa chọn giải pháp phù hợp cho phòng khám', 'Choose the right solution for your clinic with Tuan Khang'),
+    'description' => tk_home_copy('tk_home_cta_description', 'Đội ngũ chuyên môn sẵn sàng tư vấn về hệ thống Implant, thiết bị và vật liệu nha khoa.', 'Our specialists are ready to advise on implant systems, dental equipment and materials.'),
+    'label' => tk_home_copy('tk_home_cta_label', 'Nhận tư vấn chuyên môn', 'Get expert consultation'),
+    'url' => tk_home_url(tk_home_field('tk_home_cta_url'), home_url('/lien-he/')),
+);
 ?>
 
-<main id="main-content">
-    <h1 class="sr-only"><?php echo esc_html($company_name); ?></h1>
-
-    <section data-hero class="relative aspect-[1702/630] min-h-[230px] w-full overflow-hidden bg-primary" aria-roledescription="carousel" aria-label="<?php echo esc_attr(tk_home_text('Banner nổi bật', 'Featured banners')); ?>">
-        <?php for ($i = 1; $i <= 2; $i++) : $hero = tk_home_field('wpcf-anhbanner-' . $i); if (!$hero) continue; ?>
-            <div data-hero-slide data-active="<?php echo $i === 1 ? 'true' : 'false'; ?>" class="tk-hero-slide" role="group" aria-label="<?php echo esc_attr(sprintf('%d / 2', $i)); ?>">
-                <?php echo tk_home_picture($hero, 'hero', array('alt' => $company_name, 'class' => 'h-full w-full object-cover', 'loading' => $i === 1 ? 'eager' : 'lazy', 'fetchpriority' => $i === 1 ? 'high' : 'low')); ?>
-            </div>
-        <?php endfor; ?>
-        <button type="button" data-hero-prev class="absolute left-2 top-1/2 z-10 flex size-11 -translate-y-1/2 items-center justify-center rounded-full bg-slate-950/35 text-white transition hover:bg-slate-950/60 sm:left-5" aria-label="<?php echo esc_attr(tk_home_text('Banner trước', 'Previous banner')); ?>">
-            <svg class="size-6" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
-        </button>
-        <button type="button" data-hero-next class="absolute right-2 top-1/2 z-10 flex size-11 -translate-y-1/2 items-center justify-center rounded-full bg-slate-950/35 text-white transition hover:bg-slate-950/60 sm:right-5" aria-label="<?php echo esc_attr(tk_home_text('Banner sau', 'Next banner')); ?>">
-            <svg class="size-6" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
-        </button>
-        <div class="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 gap-2">
-            <?php for ($i = 0; $i < 2; $i++) : ?><button type="button" data-hero-dot aria-current="<?php echo $i === 0 ? 'true' : 'false'; ?>" class="flex size-11 items-center justify-center rounded-full" aria-label="<?php echo esc_attr(sprintf(tk_home_text('Đến banner %d', 'Go to banner %d'), $i + 1)); ?>"><span class="size-3 rounded-full <?php echo $i === 0 ? 'bg-white' : 'bg-white/50'; ?>" aria-hidden="true"></span></button><?php endfor; ?>
-        </div>
-    </section>
-
-    <?php if (tk_home_field('duytv_story_title') || tk_home_field('duytv_story_content') || tk_home_field('duytv_story_image')) : ?>
-        <section class="tk-section bg-slate-50">
-            <div class="tk-container grid items-center gap-8 md:grid-cols-2 md:gap-12">
-                <div>
-                    <h2 class="text-2xl font-bold uppercase leading-tight text-primary md:text-[30px]"><?php echo esc_html(tk_home_field('duytv_story_title')); ?></h2>
-                    <div class="tk-richtext mt-5 text-justify leading-7"><?php echo wp_kses_post(tk_home_field('duytv_story_content')); ?></div>
-                    <?php if (tk_home_field('duytv_story_link')) : ?><a class="tk-btn mt-6" href="<?php echo esc_url(tk_home_url(tk_home_field('duytv_story_link'))); ?>"><?php echo esc_html($read_more); ?></a><?php endif; ?>
+<main id="main-content" class="overflow-hidden">
+    <section class="tk-home-hero" aria-labelledby="home-hero-title">
+        <div class="tk-container grid items-center gap-10 py-10 md:py-14 lg:min-h-[620px] lg:grid-cols-12 lg:gap-10 lg:py-14">
+            <div class="tk-hero-copy lg:col-span-5">
+                <p class="tk-eyebrow"><?php echo esc_html($hero['eyebrow']); ?></p>
+                <h1 id="home-hero-title" class="tk-hero-title mt-5"><?php echo esc_html($hero['title']); ?></h1>
+                <p class="mt-6 max-w-xl text-pretty text-base leading-8 text-muted md:text-lg"><?php echo esc_html($hero['description']); ?></p>
+                <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+                    <?php tk_home_render_cta($hero['primary_label'], $hero['primary_url']); ?>
+                    <?php tk_home_render_cta($hero['secondary_label'], $hero['secondary_url'], 'secondary'); ?>
                 </div>
-                <div class="order-last overflow-hidden rounded-card shadow-card"><?php echo tk_home_picture(tk_home_field('duytv_story_image'), 'story', array('alt' => tk_home_field('duytv_story_title'), 'class' => 'aspect-[16/10] h-full w-full object-cover')); ?></div>
+                <?php if ($hero_proofs) : ?>
+                    <ul class="tk-hero-proof-list" aria-label="<?php echo esc_attr(tk_home_text('Dấu ấn năng lực Tuấn Khang', 'Tuan Khang capability highlights')); ?>">
+                        <?php foreach ($hero_proofs as $proof) : ?>
+                            <li><strong><?php echo esc_html($proof['value'] . $proof['suffix']); ?></strong><span><?php echo esc_html($proof['label']); ?></span></li>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php endif; ?>
             </div>
-        </section>
-    <?php endif; ?>
-
-    <section class="tk-section bg-primary text-white">
-        <div class="tk-container grid gap-5 md:grid-cols-3">
-            <?php for ($i = 1; $i <= 3; $i++) : $title = tk_home_field('duytv_info_title_' . $i); $description = tk_home_field('duytv_info_des_' . $i); if (!$title && !$description) continue; ?>
-                <article class="rounded-card border border-white/20 bg-white/10 p-6 text-center backdrop-blur-sm">
-                    <h2 class="text-xl font-bold uppercase"><?php echo esc_html($title); ?></h2>
-                    <div class="tk-richtext mt-3 text-blue-50"><?php echo wp_kses_post($description); ?></div>
-                </article>
-            <?php endfor; ?>
+            <div class="tk-hero-stage lg:col-span-7">
+                <figure class="tk-hero-media">
+                    <?php echo tk_home_picture($hero['image'], 'hero', array('alt' => tk_home_text('Năng lực thiết bị nha khoa của Tuấn Khang', 'Tuan Khang dental technology capabilities'), 'class' => 'h-full w-full object-cover', 'loading' => 'eager', 'fetchpriority' => 'high')); ?>
+                    <figcaption class="tk-hero-caption"><span><?php echo esc_html(tk_home_text('Công nghệ quốc tế', 'International technology')); ?></span><strong><?php echo esc_html(tk_home_text('Tuyển chọn cho thực tiễn điều trị', 'Selected for clinical practice')); ?></strong></figcaption>
+                </figure>
+                <figure class="tk-hero-proof-media">
+                    <?php echo tk_home_picture($hero['secondary_image'], 'hero-proof', array('alt' => tk_home_text('Đội ngũ Tuấn Khang và đối tác tại triển lãm nha khoa quốc tế', 'Tuan Khang team and partners at an international dental exhibition'), 'class' => 'h-full w-full object-cover', 'loading' => 'eager')); ?>
+                    <figcaption><span aria-hidden="true">TK</span><?php echo esc_html(tk_home_text('Đội ngũ thật · Năng lực thật', 'Real team · Proven capability')); ?></figcaption>
+                </figure>
+                <p class="tk-hero-index" aria-hidden="true"><span>01</span><i></i><span>12+</span></p>
+            </div>
         </div>
     </section>
 
-    <section class="tk-section bg-white">
-        <div class="tk-container">
-            <h2 class="tk-title"><?php echo esc_html(tk_home_field('duytv_news_name', tk_home_text('Tin tức', 'News'))); ?></h2>
-            <div class="mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-4"><?php tk_render_home_mosaic($news, $read_more); ?></div>
-            <?php if (tk_home_field('duytv_news_link_all')) : ?><div class="mt-9 text-center"><a class="tk-btn" href="<?php echo esc_url(tk_home_field('duytv_news_link_all')); ?>"><?php echo esc_html(tk_home_text('Xem toàn bộ tin tức', 'View all news')); ?></a></div><?php endif; ?>
-        </div>
-    </section>
-
-    <section class="tk-section bg-slate-50">
-        <div class="tk-container">
-            <h2 class="tk-title"><?php echo esc_html(tk_home_field('duytv_system_name', tk_home_text('Hệ thống Implant', 'Implant systems'))); ?></h2>
-            <div class="mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-4"><?php tk_render_home_mosaic($systems, $read_more); ?></div>
-            <?php if (tk_home_field('duytv_system_link_all')) : ?><div class="mt-9 text-center"><a class="tk-btn" href="<?php echo esc_url(tk_home_field('duytv_system_link_all')); ?>"><?php echo esc_html(tk_home_text('Xem toàn bộ', 'View all')); ?></a></div><?php endif; ?>
-        </div>
-    </section>
-
-    <section class="tk-section bg-white">
-        <div class="tk-container">
-            <h2 class="tk-title"><?php echo esc_html(tk_home_text('Sản phẩm nổi bật', 'Featured products')); ?></h2>
-            <div class="mt-9 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                <?php foreach ($products as $product) : if (!$product['image'] && !$product['title']) continue; ?>
-                    <article class="tk-card group flex flex-col">
-                        <?php if ($product['image']) : ?><a class="block aspect-[4/3] overflow-hidden bg-white p-4" href="<?php echo esc_url($product['link'] ?: '#'); ?>"><?php echo tk_home_picture($product['image'], 'product', array('alt' => $product['title'], 'class' => 'h-full w-full object-contain transition duration-500 group-hover:scale-[1.03]')); ?></a><?php endif; ?>
-                        <div class="flex flex-1 flex-col p-5"><h3 class="text-center text-lg font-bold text-primary"><a class="hover:text-accent" href="<?php echo esc_url($product['link'] ?: '#'); ?>"><?php echo esc_html($product['title']); ?></a></h3><a class="mt-auto inline-flex min-h-11 items-end justify-center pt-3 font-bold text-button hover:text-accent" href="<?php echo esc_url($product['link'] ?: '#'); ?>"><?php echo esc_html($read_more); ?> <span class="ml-2" aria-hidden="true">→</span></a></div>
+    <section class="tk-proof-runway" aria-labelledby="partner-title">
+        <div class="tk-proof-metrics">
+            <div class="tk-container">
+                <div class="tk-metric-grid" data-reveal>
+                <?php foreach ($metrics as $index => $metric) : ?>
+                    <article class="tk-metric <?php echo $index === 4 ? 'col-span-2 sm:col-span-1' : ''; ?>">
+                        <p class="tk-metric-value tabular-nums"><strong data-counter="<?php echo esc_attr($metric['target']); ?>">0</strong><span><?php echo esc_html($metric['suffix']); ?></span></p>
+                        <p class="tk-metric-label"><?php echo esc_html($metric['label']); ?></p>
                     </article>
                 <?php endforeach; ?>
-            </div>
-            <div class="mt-9 text-center"><a class="tk-btn" href="https://tuankhangmedical.com/san-pham"><?php echo esc_html(tk_home_text('Xem toàn bộ sản phẩm', 'View all products')); ?></a></div>
-        </div>
-    </section>
-
-    <section class="tk-section bg-slate-50">
-        <div class="tk-container">
-            <h2 class="tk-title"><?php echo esc_html(tk_home_text('Dự án tiêu biểu', 'Featured projects')); ?></h2>
-            <div class="mt-9 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                <?php foreach ($projects as $project) : if (!$project['image']) continue; ?>
-                    <article class="tk-card group sm:last:col-span-2 lg:last:col-span-1 lg:last:col-start-2"><a href="<?php echo esc_url($project['link'] ?: '#'); ?>" class="tk-card-image block"><?php echo tk_home_picture($project['image'], 'project', array('alt' => $project['title'], 'class' => 'h-full w-full object-cover')); ?></a><h3 class="p-3 text-center font-bold text-slate-800"><a class="inline-flex min-h-11 w-full items-center justify-center px-2 hover:text-accent" href="<?php echo esc_url($project['link'] ?: '#'); ?>"><?php echo esc_html($project['title']); ?></a></h3></article>
-                <?php endforeach; ?>
+                </div>
             </div>
         </div>
-    </section>
-
-    <section class="tk-section bg-primary text-white">
-        <div class="tk-container">
-            <h2 class="text-center text-2xl font-bold uppercase md:text-[30px]"><?php echo esc_html(tk_home_text('Hành trình thực hiện ước mơ', 'Our journey')); ?></h2>
-            <?php $stats = array(array(100000, '+', tk_home_text('Khách hàng', 'Customers')), array(30, '+', tk_home_text('Hãng sản xuất', 'Manufacturers')), array(35, '+', tk_home_text('Container mỗi năm', 'Containers per year')), array(24, '/7', tk_home_text('Hỗ trợ khách hàng', 'Customer support')), array(12, '+', tk_home_text('Năm kinh nghiệm', 'Years of experience'))); ?>
-            <div class="mt-9 grid grid-cols-2 gap-5 md:grid-cols-5">
-                <?php foreach ($stats as $index => $stat) : ?><div class="<?php echo $index === 4 ? 'col-span-2 mx-auto w-1/2 md:col-span-1 md:w-auto' : ''; ?> rounded-card border border-white/20 bg-white/10 p-5 text-center"><p class="text-3xl font-bold md:text-4xl"><span data-counter="<?php echo esc_attr($stat[0]); ?>">0</span><?php echo esc_html($stat[1]); ?></p><p class="mt-2 text-sm font-bold uppercase text-blue-100"><?php echo esc_html($stat[2]); ?></p></div><?php endforeach; ?>
+        <?php if ($partners) : ?>
+            <div class="tk-proof-partners">
+            <div class="tk-container">
+                <div class="flex flex-col gap-6 md:flex-row md:items-center md:gap-10">
+                    <div class="md:w-48" data-reveal><p class="tk-eyebrow"><?php echo esc_html(tk_home_text('Mạng lưới quốc tế', 'Global network')); ?></p><h2 id="partner-title" class="mt-2 font-display text-2xl font-semibold text-primary"><?php echo esc_html(tk_home_text('Đối tác đồng hành', 'Trusted partners')); ?></h2></div>
+                    <div class="tk-partner-cloud" tabindex="0" aria-label="<?php echo esc_attr(tk_home_text('Danh sách đối tác quốc tế', 'International partner list')); ?>">
+                        <?php foreach ($partners as $partner) : ?><div class="tk-partner-logo"><?php echo tk_home_picture($partner, 'partner', array('alt' => tk_home_text('Logo đối tác Tuấn Khang', 'Tuan Khang partner logo'), 'class' => 'max-h-full w-full object-contain')); ?></div><?php endforeach; ?>
+                    </div>
+                </div>
             </div>
-        </div>
+            </div>
+        <?php endif; ?>
     </section>
 
-    <?php if ($partners) : ?>
-        <section class="tk-section overflow-hidden bg-white">
-            <div class="tk-container"><h2 class="tk-title"><?php echo esc_html(tk_home_text('Đối tác của chúng tôi', 'Our partners')); ?></h2></div>
-            <div class="mt-9 overflow-hidden" tabindex="0" aria-label="<?php echo esc_attr(tk_home_text('Danh sách đối tác', 'Partner list')); ?>">
-                <div class="tk-partner-track flex items-center gap-10 px-5">
-                    <?php for ($copy = 0; $copy < 2; $copy++) : ?><div class="flex items-center gap-10" <?php echo $copy ? 'aria-hidden="true"' : ''; ?>><?php foreach ($partners as $partner) : ?><div class="flex h-24 w-40 shrink-0 items-center justify-center rounded-xl border border-slate-100 bg-white p-3"><?php echo tk_home_picture($partner, 'partner', array('alt' => $copy ? '' : tk_home_text('Logo đối tác', 'Partner logo'), 'class' => 'max-h-full w-full object-contain')); ?></div><?php endforeach; ?></div><?php endfor; ?>
+    <?php if ($story_title || $story_content || $story_image) : ?>
+        <section class="tk-home-section bg-white">
+            <div class="tk-container grid items-center gap-10 lg:grid-cols-12 lg:gap-16">
+                <figure class="tk-story-media lg:col-span-6" data-reveal><?php echo tk_home_picture($story_image, 'story', array('alt' => $story_title, 'class' => 'h-full w-full object-cover')); ?><figcaption><?php echo esc_html(tk_home_text('Thiết bị và giải pháp nha khoa được lựa chọn từ thực tiễn.', 'Dental equipment and solutions selected for real clinical needs.')); ?></figcaption></figure>
+                <div class="lg:col-span-6" data-reveal data-reveal-order="2">
+                    <p class="tk-eyebrow"><?php echo esc_html(tk_home_text('Câu chuyện thương hiệu', 'Our story')); ?></p>
+                    <h2 class="tk-display-title mt-4"><?php echo esc_html($story_title); ?></h2>
+                    <blockquote class="tk-story-quote"><?php echo esc_html(tk_home_text('Uy tín được xây dựng từ sự thấu hiểu nhu cầu điều trị và năng lực đồng hành lâu dài.', 'Trust is built through clinical understanding and the ability to stand alongside customers for the long term.')); ?></blockquote>
+                    <div class="tk-richtext mt-6 max-w-[65ch] text-pretty leading-8"><?php echo wp_kses_post($story_content); ?></div>
+                    <div class="mt-7"><?php tk_home_render_cta($read_more, $story_link, 'secondary'); ?></div>
                 </div>
             </div>
         </section>
     <?php endif; ?>
+
+    <?php if ($values) : ?>
+        <section class="tk-home-section bg-surface">
+            <div class="tk-container">
+                <?php tk_home_render_heading(tk_home_text('Giá trị dẫn đường', 'What guides us'), tk_home_text('Mục tiêu · Sứ mệnh · Tầm nhìn', 'Purpose · Mission · Vision'), tk_home_text('Ba cam kết định hướng cách Tuấn Khang lựa chọn sản phẩm, phục vụ khách hàng và phát triển dài hạn.', 'Three commitments guide how Tuan Khang selects products, serves customers and grows for the long term.')); ?>
+                <div class="mt-10 grid items-stretch gap-5 md:grid-cols-3">
+                    <?php foreach ($values as $index => $value) : ?><article class="tk-value-card" data-reveal data-reveal-order="<?php echo esc_attr($index + 1); ?>"><div class="tk-value-top"><div class="tk-line-icon"><?php echo tk_home_icon($value['icon']); ?></div><span>0<?php echo esc_html($index + 1); ?></span></div><h3><?php echo esc_html($value['title']); ?></h3><div class="tk-richtext mt-4 text-pretty leading-7 text-muted"><?php echo wp_kses_post($value['description']); ?></div></article><?php endforeach; ?>
+                </div>
+            </div>
+        </section>
+    <?php endif; ?>
+
+    <section class="tk-capability-section bg-tech text-white">
+        <div class="tk-container grid items-center gap-12 py-16 lg:grid-cols-12 lg:gap-16">
+            <div class="lg:col-span-7">
+                <?php tk_home_render_heading(tk_home_copy('tk_home_capability_eyebrow', 'Nền tảng vận hành', 'Operational foundation'), tk_home_copy('tk_home_capability_title', 'Năng lực tạo nên khác biệt', 'Capabilities that make the difference'), tk_home_copy('tk_home_capability_description', 'Tuấn Khang kết hợp danh mục sản phẩm được tuyển chọn, hỗ trợ chuyên môn và năng lực phân phối để đồng hành lâu dài cùng bác sĩ.', 'Tuan Khang combines a curated portfolio, expert support and nationwide distribution to build lasting partnerships with dental professionals.'), 'dark'); ?>
+                <div class="mt-9 space-y-3">
+                    <?php foreach ($capabilities as $index => $capability) : ?><a class="tk-capability-card" href="<?php echo esc_url($capability['link']); ?>" data-reveal data-reveal-order="<?php echo esc_attr($index + 1); ?>"><span class="tk-capability-index">0<?php echo esc_html($index + 1); ?></span><span class="min-w-0"><strong><?php echo esc_html($capability['title']); ?></strong><small><?php echo esc_html($capability['description']); ?></small></span><svg class="tk-cta-arrow ml-auto size-5 shrink-0" aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 10h12M11 5l5 5-5 5"/></svg></a><?php endforeach; ?>
+                </div>
+            </div>
+            <figure class="tk-capability-media lg:col-span-5" data-reveal data-reveal-order="2"><?php echo tk_home_picture($capability_image, 'capability', array('alt' => tk_home_text('Hoạt động chuyên môn và hợp tác quốc tế của Tuấn Khang', 'Tuan Khang professional and international partnership activities'), 'class' => 'h-full w-full object-cover')); ?><figcaption><strong>30+</strong><span><?php echo esc_html(tk_home_text('thương hiệu và nhà sản xuất đồng hành', 'partner brands and manufacturers')); ?></span></figcaption></figure>
+        </div>
+    </section>
+
+    <?php if ($systems) : ?>
+        <section class="tk-home-section bg-white">
+            <div class="tk-container">
+                <div class="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+                    <?php tk_home_render_heading(tk_home_text('Giải pháp cấy ghép', 'Implant solutions'), tk_home_field('duytv_system_name', tk_home_text('Hệ thống Implant', 'Implant systems')), tk_home_text('Các hệ thống được lựa chọn theo tiêu chí ổn định, chính xác và phù hợp thực hành lâm sàng.', 'Systems selected for stability, precision and clinical relevance.')); ?>
+                    <?php if (tk_home_field('duytv_system_link_all')) : ?><div data-reveal><?php tk_home_render_cta($view_all, tk_home_url(tk_home_field('duytv_system_link_all')), 'secondary'); ?></div><?php endif; ?>
+                </div>
+                <div class="mt-10 grid items-stretch gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                    <?php foreach ($systems as $index => $item) : ?><article class="tk-home-card" data-reveal data-reveal-order="<?php echo esc_attr(($index % 4) + 1); ?>"><?php if ($item['link']) : ?><a class="tk-home-card-media" href="<?php echo esc_url($item['link']); ?>"><?php else : ?><div class="tk-home-card-media"><?php endif; ?><?php echo tk_home_picture($item['image'], 'product', array('alt' => $item['title'], 'class' => 'h-full w-full object-cover')); ?><?php echo $item['link'] ? '</a>' : '</div>'; ?><div class="tk-home-card-body"><h3 class="tk-card-title"><?php echo esc_html($item['title']); ?></h3><?php if ($item['link']) : ?><a class="tk-text-link mt-auto" href="<?php echo esc_url($item['link']); ?>"><?php echo esc_html($read_more); ?><span aria-hidden="true">→</span></a><?php endif; ?></div></article><?php endforeach; ?>
+                </div>
+            </div>
+        </section>
+    <?php endif; ?>
+
+    <?php if ($products) : ?>
+        <section class="tk-home-section bg-surface">
+            <div class="tk-container">
+                <div class="flex flex-col gap-5 md:flex-row md:items-end md:justify-between"><?php tk_home_render_heading(tk_home_text('Danh mục tuyển chọn', 'Curated portfolio'), tk_home_text('Sản phẩm nổi bật', 'Featured products'), tk_home_text('Những sản phẩm được quan tâm trong hệ sinh thái thiết bị và vật liệu nha khoa Tuấn Khang.', 'Selected products from the Tuan Khang dental equipment and materials portfolio.')); ?><div data-reveal><?php tk_home_render_cta($view_all, home_url('/san-pham/'), 'secondary'); ?></div></div>
+                <div class="mt-10 grid items-stretch gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                    <?php foreach ($products as $index => $item) : ?><article class="tk-home-card tk-product-card" data-reveal data-reveal-order="<?php echo esc_attr(($index % 4) + 1); ?>"><?php if ($item['link']) : ?><a class="tk-home-card-media" href="<?php echo esc_url($item['link']); ?>"><?php else : ?><div class="tk-home-card-media"><?php endif; ?><?php echo tk_home_picture($item['image'], 'product', array('alt' => $item['title'], 'class' => 'h-full w-full object-contain')); ?><?php echo $item['link'] ? '</a>' : '</div>'; ?><div class="tk-home-card-body"><h3 class="tk-card-title"><?php echo esc_html($item['title']); ?></h3><?php if ($item['link']) : ?><a class="tk-text-link mt-auto" href="<?php echo esc_url($item['link']); ?>"><?php echo esc_html($read_more); ?><span aria-hidden="true">→</span></a><?php endif; ?></div></article><?php endforeach; ?>
+                </div>
+            </div>
+        </section>
+    <?php endif; ?>
+
+    <?php if ($projects) : ?>
+        <section class="tk-home-section bg-white">
+            <div class="tk-container">
+                <?php tk_home_render_heading(tk_home_text('Năng lực triển khai', 'Delivery capability'), tk_home_text('Dự án tiêu biểu', 'Featured projects'), tk_home_text('Kinh nghiệm cung cấp giải pháp cho bệnh viện, phòng khám và các đơn vị y tế.', 'Experience delivering solutions for hospitals, clinics and healthcare organisations.')); ?>
+                <div class="tk-project-grid mt-10">
+                    <?php foreach ($projects as $index => $item) : ?><article class="tk-project-card <?php echo $index === 0 ? 'tk-project-featured' : ''; ?>" data-reveal data-reveal-order="<?php echo esc_attr($index + 1); ?>"><?php if ($item['link']) : ?><a class="tk-project-media" href="<?php echo esc_url($item['link']); ?>"><?php else : ?><div class="tk-project-media"><?php endif; ?><?php echo tk_home_project_picture($index, $item['image'], $item['title']); ?><?php echo $item['link'] ? '</a>' : '</div>'; ?><div class="tk-project-body"><p><?php echo esc_html($index === 0 ? tk_home_text('Case study nổi bật', 'Featured case study') : tk_home_text('Dự án đã triển khai', 'Delivered project')); ?></p><h3><?php echo esc_html($item['title']); ?></h3><?php if ($item['link']) : ?><a class="tk-text-link mt-auto" href="<?php echo esc_url($item['link']); ?>"><?php echo esc_html($read_more); ?><span aria-hidden="true">→</span></a><?php endif; ?></div></article><?php endforeach; ?>
+                </div>
+            </div>
+        </section>
+    <?php endif; ?>
+
+    <?php if ($news) : ?>
+        <section class="tk-home-section bg-surface">
+            <div class="tk-container">
+                <div class="flex flex-col gap-5 md:flex-row md:items-end md:justify-between"><?php tk_home_render_heading(tk_home_text('Kiến thức và hoạt động', 'Knowledge and activities'), tk_home_field('duytv_news_name', tk_home_text('Tin tức chuyên môn', 'Professional insights')), tk_home_text('Cập nhật công nghệ, hội thảo và hoạt động hợp tác dành cho cộng đồng nha khoa.', 'Technology updates, seminars and partnerships for the dental community.')); ?><?php if (tk_home_field('duytv_news_link_all')) : ?><div data-reveal><?php tk_home_render_cta($view_all, tk_home_url(tk_home_field('duytv_news_link_all')), 'secondary'); ?></div><?php endif; ?></div>
+                <div class="tk-news-grid mt-10">
+                    <?php foreach ($news as $index => $item) : ?><article class="tk-news-card" data-reveal data-reveal-order="<?php echo esc_attr($index + 1); ?>"><?php if ($item['link']) : ?><a class="tk-news-media" href="<?php echo esc_url($item['link']); ?>"><?php else : ?><div class="tk-news-media"><?php endif; ?><?php echo tk_home_picture($item['image'], 'news', array('alt' => $item['title'], 'class' => 'h-full w-full object-cover')); ?><?php echo $item['link'] ? '</a>' : '</div>'; ?><div class="tk-news-body"><p><?php echo esc_html(tk_home_text('Góc chuyên môn', 'Insights')); ?></p><h3><?php echo esc_html($item['title']); ?></h3><?php if ($item['link']) : ?><a class="tk-text-link mt-auto" href="<?php echo esc_url($item['link']); ?>"><?php echo esc_html($read_more); ?><span aria-hidden="true">→</span></a><?php endif; ?></div></article><?php endforeach; ?>
+                </div>
+            </div>
+        </section>
+    <?php endif; ?>
+
+    <section class="bg-white py-12">
+        <div class="tk-container">
+            <div class="tk-final-cta" data-reveal><span class="tk-final-cta-grid" aria-hidden="true"></span>
+                <div><p class="tk-eyebrow text-sky-300"><?php echo esc_html(tk_home_text('Đồng hành cùng bác sĩ', 'Partnering with dental professionals')); ?></p><h2><?php echo esc_html($final_cta['title']); ?></h2><p><?php echo esc_html($final_cta['description']); ?></p></div>
+                <div class="flex shrink-0 flex-col gap-3 sm:flex-row lg:flex-col xl:flex-row"><?php tk_home_render_cta($final_cta['label'], $final_cta['url'], 'primary', 'bg-white text-primary hover:bg-sky-50'); ?><?php if ($hotline) : ?><a class="tk-cta tk-cta-secondary border-white/30 text-white hover:border-white hover:bg-white/10" href="tel:<?php echo esc_attr(preg_replace('/[^0-9+]/', '', $hotline)); ?>"><span><?php echo esc_html($hotline); ?></span><svg class="size-4" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.13.96.36 1.9.69 2.8a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.33 1.85.56 2.81.69A2 2 0 0122 16.92z"/></svg></a><?php endif; ?></div>
+            </div>
+        </div>
+    </section>
 </main>
 
 <?php get_footer(); ?>

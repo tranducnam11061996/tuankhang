@@ -46,7 +46,7 @@ function tk_site_banner($title, $breadcrumbs = array())
 
 function tk_site_preload_banner()
 {
-    if (is_front_page() || is_admin()) return;
+    if (is_front_page() || is_singular('san-pham') || is_admin()) return;
     $fallback = get_theme_file_uri('/image/background-head-about.png');
     $srcset = array();
     foreach (array(480, 768, 1200, 1702) as $width) {

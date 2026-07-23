@@ -160,7 +160,7 @@ function tk_product_featured_ids()
     return $ids;
 }
 
-function tk_product_card($post_id, $compact = false)
+function tk_product_card($post_id, $compact = false, $heading_level = 'h2')
 {
     $post_id = (int) $post_id;
     $title = get_the_title($post_id);
@@ -174,10 +174,11 @@ function tk_product_card($post_id, $compact = false)
         return;
     }
 
+    $heading_level = in_array($heading_level, array('h2', 'h3'), true) ? $heading_level : 'h2';
     echo '<article class="group flex h-full flex-col">';
     echo '<a class="flex aspect-square items-center justify-center overflow-hidden border border-slate-200 bg-white p-3 transition hover:border-primary hover:shadow-card" href="' . esc_url($url) . '" aria-label="' . esc_attr($title) . '">';
     echo $thumbnail_id ? tk_picture($thumbnail_id, 'product-card', array('alt' => $title, 'class' => 'h-full w-full object-contain transition duration-300 group-hover:scale-[1.03]')) : '<span class="text-sm text-slate-400">' . esc_html(tk_home_text('Chưa có ảnh', 'No image')) . '</span>';
-    echo '</a><h2 class="mt-3 text-center text-base font-bold leading-6 text-slate-800"><a class="transition hover:text-primary" href="' . esc_url($url) . '">' . esc_html($title) . '</a></h2></article>';
+    echo '</a><' . $heading_level . ' class="mt-3 text-center text-base font-bold leading-6 text-slate-800"><a class="transition hover:text-primary" href="' . esc_url($url) . '">' . esc_html($title) . '</a></' . $heading_level . '></article>';
 }
 
 function tk_product_sidebar($instance = 'desktop')
@@ -230,7 +231,7 @@ function tk_product_related_ids($post_id, $limit = 4)
     if ($term instanceof WP_Term) {
         $same_term = new WP_Query(array(
             'post_type' => 'san-pham', 'post_status' => 'publish', 'posts_per_page' => $limit,
-            'post__not_in' => array($post_id), 'orderby' => 'rand', 'fields' => 'ids',
+            'post__not_in' => array($post_id), 'orderby' => array('menu_order' => 'ASC', 'date' => 'DESC'), 'fields' => 'ids',
             'no_found_rows' => true, 'ignore_sticky_posts' => true,
             'tax_query' => array(array('taxonomy' => 'danh-muc', 'field' => 'term_id', 'terms' => array((int) $term->term_id))),
         ));
@@ -240,7 +241,7 @@ function tk_product_related_ids($post_id, $limit = 4)
     if (count($ids) < $limit) {
         $fallback = new WP_Query(array(
             'post_type' => 'san-pham', 'post_status' => 'publish', 'posts_per_page' => $limit - count($ids),
-            'post__not_in' => array_merge(array($post_id), $ids), 'orderby' => 'rand', 'fields' => 'ids',
+            'post__not_in' => array_merge(array($post_id), $ids), 'orderby' => array('menu_order' => 'ASC', 'date' => 'DESC'), 'fields' => 'ids',
             'no_found_rows' => true, 'ignore_sticky_posts' => true,
         ));
         $ids = array_merge($ids, array_map('intval', $fallback->posts));
@@ -248,3 +249,240 @@ function tk_product_related_ids($post_id, $limit = 4)
 
     return array_slice(array_values(array_unique($ids)), 0, $limit);
 }
+
+function tk_product_premium_field($key, $post_id)
+{
+    $post_id = (int) $post_id;
+    $value = function_exists('get_field') ? get_field($key, $post_id) : null;
+    if ($value === null || $value === false || $value === '') {
+        $value = get_post_meta($post_id, $key, true);
+    }
+    return $value;
+}
+
+function tk_product_gallery_items($post_id)
+{
+    $items = array();
+    $seen = array();
+    $add = static function ($image) use (&$items, &$seen) {
+        $data = tk_home_image_data($image);
+        $identity = $data['id'] ? 'id:' . $data['id'] : 'url:' . $data['url'];
+        if (!$data['url'] || isset($seen[$identity])) {
+            return;
+        }
+        $seen[$identity] = true;
+        $items[] = $data;
+    };
+
+    $add(get_post_thumbnail_id((int) $post_id));
+    for ($index = 1; $index <= 5; $index++) {
+        $add(tk_product_premium_field('tk_product_gallery_image_' . $index, $post_id));
+    }
+    return $items;
+}
+
+function tk_product_premium_highlights($post_id)
+{
+    $items = array();
+    for ($index = 1; $index <= 4; $index++) {
+        $title = trim((string) tk_product_premium_field('tk_product_highlight_title_' . $index, $post_id));
+        $description = trim((string) tk_product_premium_field('tk_product_highlight_description_' . $index, $post_id));
+        if (!$title && !$description) {
+            continue;
+        }
+        $items[] = array(
+            'title' => $title ?: sprintf(tk_home_text('Điểm nổi bật %d', 'Highlight %d'), $index),
+            'description' => $description,
+        );
+    }
+    return $items;
+}
+
+function tk_product_premium_specs($post_id)
+{
+    $items = array();
+    $base = array(
+        tk_home_text('Model', 'Model') => get_post_meta($post_id, 'wpcf-model', true),
+        tk_home_text('Hãng sản xuất', 'Manufacturer') => get_post_meta($post_id, 'wpcf-hang-sx', true),
+        tk_home_text('Xuất xứ', 'Origin') => get_post_meta($post_id, 'wpcf-xuat-xu', true),
+    );
+    foreach ($base as $label => $value) {
+        if (trim((string) $value) !== '') {
+            $items[] = array('label' => $label, 'value' => trim((string) $value));
+        }
+    }
+    for ($index = 1; $index <= 8; $index++) {
+        $label = trim((string) tk_product_premium_field('tk_product_spec_label_' . $index, $post_id));
+        $value = trim((string) tk_product_premium_field('tk_product_spec_value_' . $index, $post_id));
+        if ($label && $value) {
+            $items[] = array('label' => $label, 'value' => $value);
+        }
+    }
+    return $items;
+}
+
+function tk_product_premium_tagline($post_id, $short_description = '')
+{
+    $tagline = trim((string) tk_product_premium_field('tk_product_tagline', $post_id));
+    if ($tagline) {
+        return $tagline;
+    }
+
+    $term = tk_product_primary_term($post_id);
+    $manufacturer = trim((string) get_post_meta($post_id, 'wpcf-hang-sx', true));
+    $origin = trim((string) get_post_meta($post_id, 'wpcf-xuat-xu', true));
+    $facts = array_values(array_unique(array_filter(array(
+        $term instanceof WP_Term ? $term->name : '',
+        $manufacturer,
+        $origin,
+    ))));
+    if ($facts) {
+        return implode(' · ', $facts);
+    }
+    return wp_trim_words(wp_strip_all_tags((string) $short_description), 18, '…');
+}
+
+function tk_product_catalogue_data($post_id)
+{
+    $file = tk_product_premium_field('tk_product_catalogue', $post_id);
+    if (is_array($file) && !empty($file['url'])) {
+        return array(
+            'url' => (string) $file['url'],
+            'title' => (string) ($file['title'] ?? basename((string) $file['url'])),
+        );
+    }
+    if (is_numeric($file)) {
+        $url = wp_get_attachment_url((int) $file);
+        if ($url) {
+            return array('url' => $url, 'title' => get_the_title((int) $file));
+        }
+    }
+    if (is_string($file) && filter_var($file, FILTER_VALIDATE_URL)) {
+        return array('url' => $file, 'title' => basename((string) wp_parse_url($file, PHP_URL_PATH)));
+    }
+    return array();
+}
+
+function tk_product_video_embed_url($post_id)
+{
+    $url = trim((string) tk_product_premium_field('tk_product_video_url', $post_id));
+    if (!$url) {
+        return '';
+    }
+    $parts = wp_parse_url($url);
+    $host = strtolower((string) ($parts['host'] ?? ''));
+    $path = trim((string) ($parts['path'] ?? ''), '/');
+    if (strpos($host, 'youtu.be') !== false) {
+        $video_id = preg_replace('/[^A-Za-z0-9_-]/', '', explode('/', $path)[0] ?? '');
+        return $video_id ? 'https://www.youtube-nocookie.com/embed/' . $video_id . '?autoplay=1&rel=0' : '';
+    }
+    if (strpos($host, 'youtube.com') !== false) {
+        parse_str((string) ($parts['query'] ?? ''), $query);
+        $video_id = preg_replace('/[^A-Za-z0-9_-]/', '', (string) ($query['v'] ?? ''));
+        if (!$video_id && strpos($path, 'embed/') === 0) {
+            $video_id = preg_replace('/[^A-Za-z0-9_-]/', '', substr($path, 6));
+        }
+        return $video_id ? 'https://www.youtube-nocookie.com/embed/' . $video_id . '?autoplay=1&rel=0' : '';
+    }
+    if (strpos($host, 'vimeo.com') !== false) {
+        $video_id = preg_replace('/\D+/', '', $path);
+        return $video_id ? 'https://player.vimeo.com/video/' . $video_id . '?autoplay=1&dnt=1' : '';
+    }
+    return '';
+}
+
+function tk_product_normalize_rich_content($post_id)
+{
+    $raw = (string) get_post_field('post_content', (int) $post_id);
+    $content = apply_filters('the_content', $raw);
+    if (!$content) {
+        return '';
+    }
+
+    if (class_exists('WP_HTML_Tag_Processor')) {
+        $processor = new WP_HTML_Tag_Processor($content);
+        while ($processor->next_tag()) {
+            $tag = strtoupper((string) $processor->get_tag());
+            $processor->remove_attribute('style');
+            $processor->remove_attribute('align');
+            if ($tag === 'IMG') {
+                $processor->set_attribute('loading', 'lazy');
+                $processor->set_attribute('decoding', 'async');
+                $processor->set_attribute('fetchpriority', 'auto');
+            }
+        }
+        $content = $processor->get_updated_html();
+    }
+
+    $content = preg_replace_callback(
+        '/(?:<p(?:\s[^>]*)?>\s*-\s*.*?<\/p>\s*){2,}/is',
+        static function ($match) {
+            preg_match_all('/<p(?:\s[^>]*)?>\s*-\s*(.*?)<\/p>/is', $match[0], $items);
+            if (empty($items[1])) {
+                return $match[0];
+            }
+            return '<ul class="tk-product-generated-list"><li>' . implode('</li><li>', $items[1]) . '</li></ul>';
+        },
+        $content
+    );
+
+    $content = preg_replace_callback(
+        '/<img\b[^>]*class="[^"]*wp-image-(\d+)[^"]*"[^>]*>/i',
+        static function ($match) {
+            $attachment_id = (int) $match[1];
+            if (!wp_get_attachment_url($attachment_id)) {
+                return $match[0];
+            }
+            return tk_picture(
+                $attachment_id,
+                'product-content',
+                array(
+                    'alt' => (string) get_post_meta($attachment_id, '_wp_attachment_image_alt', true),
+                    'class' => 'tk-product-content-image',
+                )
+            );
+        },
+        $content
+    );
+
+    $markers = array('Quý Nha khoa muốn', 'Mọi chi tiết', 'For more information', 'Please contact');
+    foreach ($markers as $marker) {
+        $marker_position = stripos($content, $marker);
+        if ($marker_position === false) {
+            continue;
+        }
+        $start = strripos(substr($content, 0, $marker_position), '<p');
+        $tail = $start !== false ? substr($content, $start) : '';
+        if ($tail && (preg_match('/[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}/', wp_strip_all_tags($tail)) || stripos($tail, 'tel:') !== false)) {
+            $content = substr($content, 0, $start) . '<aside class="tk-product-legacy-contact">' . $tail . '</aside>';
+        }
+        break;
+    }
+
+    return wp_kses_post($content);
+}
+
+function tk_product_preload_hero()
+{
+    if (!is_singular('san-pham')) {
+        return;
+    }
+    $gallery = tk_product_gallery_items(get_queried_object_id());
+    $image = $gallery[0] ?? array();
+    if (empty($image['url'])) {
+        return;
+    }
+    $srcset = array();
+    foreach (array(480, 768, 1024) as $width) {
+        $relative = 'assets/dist/images/products/' . (int) ($image['id'] ?? 0) . '-' . $width . '.avif';
+        if (!empty($image['id']) && is_file(get_theme_file_path($relative))) {
+            $srcset[] = get_theme_file_uri($relative) . ' ' . $width . 'w';
+        }
+    }
+    echo '<link rel="preload" as="image" href="' . esc_url($image['url']) . '"';
+    if ($srcset) {
+        echo ' imagesrcset="' . esc_attr(implode(', ', $srcset)) . '" imagesizes="(min-width: 1024px) 42vw, calc(100vw - 32px)" type="image/avif"';
+    }
+    echo ' fetchpriority="high">' . "\n";
+}
+add_action('wp_head', 'tk_product_preload_hero', 3);

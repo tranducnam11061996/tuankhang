@@ -2,15 +2,18 @@
   "name": "tuankhang-theme",
   "private": true,
   "scripts": {
-    "dev": "concurrently -n site,home,products,content \"npm:dev:site\" \"npm:dev:home\" \"npm:dev:products\" \"npm:dev:content\"",
+    "dev": "concurrently -n site,home,products,product-detail,dialogs,content \"npm:dev:site\" \"npm:dev:home\" \"npm:dev:products\" \"npm:dev:product-detail\" \"npm:dev:dialogs\" \"npm:dev:content\"",
     "dev:site": "tailwindcss -i ./assets/src/site.css -o ./assets/dist/site.min.css --watch",
     "dev:home": "tailwindcss -i ./assets/src/home.css -o ./assets/dist/home.min.css --watch",
     "dev:products": "tailwindcss -i ./assets/src/products.css -o ./assets/dist/products.min.css --watch",
+    "dev:product-detail": "tailwindcss -i ./assets/src/product-detail.css -o ./assets/dist/product-detail.min.css --watch",
+    "dev:dialogs": "tailwindcss -i ./assets/src/product-dialogs.css -o ./assets/dist/product-dialogs.min.css --watch",
     "dev:content": "tailwindcss -i ./assets/src/content.css -o ./assets/dist/content.min.css --watch",
-    "build:css": "tailwindcss -i ./assets/src/site.css -o ./assets/dist/site.min.css --minify && tailwindcss -i ./assets/src/home.css -o ./assets/dist/home.min.css --minify && tailwindcss -i ./assets/src/products.css -o ./assets/dist/products.min.css --minify && tailwindcss -i ./assets/src/content.css -o ./assets/dist/content.min.css --minify",
+    "build:css": "tailwindcss -i ./assets/src/site.css -o ./assets/dist/site.min.css --minify && tailwindcss -i ./assets/src/home.css -o ./assets/dist/home.min.css --minify && tailwindcss -i ./assets/src/products.css -o ./assets/dist/products.min.css --minify && tailwindcss -i ./assets/src/product-detail.css -o ./assets/dist/product-detail.min.css --minify && tailwindcss -i ./assets/src/product-dialogs.css -o ./assets/dist/product-dialogs.min.css --minify && tailwindcss -i ./assets/src/content.css -o ./assets/dist/content.min.css --minify",
     "build:js": "esbuild ./assets/src/site.js --bundle --minify --target=es2020 --outfile=./assets/dist/site.min.js && esbuild ./assets/src/home.js --bundle --minify --target=es2020 --outfile=./assets/dist/home.min.js && esbuild ./assets/src/products.js --bundle --minify --target=es2020 --outfile=./assets/dist/products.min.js && esbuild ./assets/src/content.js --bundle --minify --target=es2020 --outfile=./assets/dist/content.min.js",
+    "build:fonts": "node ./scripts/build-fonts.mjs",
     "build:images": "node ./scripts/build-images.mjs",
-    "build": "npm run build:css && npm run build:js && npm run build:images"
+    "build": "npm run build:fonts && npm run build:css && npm run build:js && npm run build:images"
   },
   "devDependencies": {
     "@tailwindcss/cli": "^4.1.11",

@@ -8,6 +8,15 @@
   const overlay = document.querySelector('[data-menu-overlay]');
   let lastFocus = null;
 
+  const siteHeader = document.querySelector('[data-site-header]');
+  const headerSentinel = document.querySelector('[data-header-sentinel]');
+  if (siteHeader && headerSentinel && 'IntersectionObserver' in window) {
+    const headerObserver = new IntersectionObserver(([entry]) => {
+      siteHeader.dataset.scrolled = String(!entry.isIntersecting);
+    });
+    headerObserver.observe(headerSentinel);
+  }
+
   const closeMenu = () => {
     document.body.classList.remove('tk-menu-open');
     menuButton?.setAttribute('aria-expanded', 'false');
@@ -109,8 +118,4 @@
     document.body.appendChild(script);
   };
   ['pointerdown', 'keydown', 'touchstart'].forEach((eventName) => window.addEventListener(eventName, loadFacebook, { once: true, passive: true }));
-  window.setTimeout(() => {
-    if ('requestIdleCallback' in window) window.requestIdleCallback(loadFacebook, { timeout: 5000 });
-    else loadFacebook();
-  }, 5000);
 })();

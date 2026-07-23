@@ -62,6 +62,24 @@ function tk_home_url($value, $default = '#')
     return $value;
 }
 
+function tk_home_hero_image()
+{
+    $image = tk_home_field('tk_home_hero_image');
+    if (!$image) {
+        $image = tk_home_field('duytv_story_image');
+    }
+    if (!$image) {
+        $image = tk_home_field('wpcf-anhbanner-1');
+    }
+    return $image;
+}
+
+function tk_home_hero_secondary_image()
+{
+    $image = tk_home_field('tk_home_hero_secondary_image');
+    return $image ?: 2250;
+}
+
 function tk_home_logo($white = false)
 {
     $suffix = tk_home_language() === 'en' ? '-en' : '';
@@ -105,8 +123,10 @@ function tk_home_desktop_menu($nodes, $depth = 0)
     echo '<ul class="' . esc_attr($list_class) . '">';
     foreach ($nodes as $node) {
         $item = $node['item'];
+        $is_current = in_array('current-menu-item', (array) $item->classes, true)
+            || in_array('current-menu-ancestor', (array) $item->classes, true);
         echo '<li class="tk-menu-item">';
-        echo '<a class="tk-menu-link" href="' . esc_url($item->url) . '" title="' . esc_attr($item->attr_title ?: $item->title) . '">' . esc_html($item->title) . '</a>';
+        echo '<a class="tk-menu-link' . ($is_current ? ' is-current' : '') . '" href="' . esc_url($item->url) . '" title="' . esc_attr($item->attr_title ?: $item->title) . '"' . ($is_current ? ' aria-current="page"' : '') . '>' . esc_html($item->title) . '</a>';
         tk_home_desktop_menu($node['children'], $depth + 1);
         echo '</li>';
     }
@@ -122,9 +142,11 @@ function tk_home_mobile_menu($nodes, $depth = 0)
     echo '<ul class="' . esc_attr($class) . '">';
     foreach ($nodes as $node) {
         $item = $node['item'];
+        $is_current = in_array('current-menu-item', (array) $item->classes, true)
+            || in_array('current-menu-ancestor', (array) $item->classes, true);
         echo '<li class="border-b border-slate-100">';
         echo '<div class="flex items-center">';
-        echo '<a class="flex min-h-11 flex-1 items-center py-2 font-semibold text-primary" href="' . esc_url($item->url) . '">' . esc_html($item->title) . '</a>';
+        echo '<a class="flex min-h-11 flex-1 items-center py-2 font-semibold text-primary' . ($is_current ? ' is-current' : '') . '" href="' . esc_url($item->url) . '"' . ($is_current ? ' aria-current="page"' : '') . '>' . esc_html($item->title) . '</a>';
         if ($node['children']) {
             echo '<button type="button" data-submenu-toggle aria-expanded="false" class="flex size-11 items-center justify-center rounded text-primary" aria-label="' . esc_attr(tk_home_text('Mở menu con', 'Open submenu')) . '">';
             echo '<svg class="size-4" aria-hidden="true" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>';
@@ -176,15 +198,19 @@ function tk_home_image_data($image)
 function tk_home_slot_config($slot)
 {
     $configs = array(
-        'hero' => array('widths' => array(480, 768, 1280, 1702), 'sizes' => '100vw', 'directory' => 'home'),
-        'story' => array('widths' => array(480, 768, 1024), 'sizes' => '(min-width: 768px) 50vw, 100vw', 'directory' => 'home'),
-        'news' => array('widths' => array(480, 768, 1024), 'sizes' => '(min-width: 1024px) 40vw, (min-width: 640px) 50vw, 100vw', 'directory' => 'home'),
+        'hero' => array('widths' => array(480, 768, 1200, 1600), 'sizes' => '(min-width: 1024px) 50vw, 100vw', 'directory' => 'home'),
+        'hero-proof' => array('widths' => array(320, 480, 768), 'sizes' => '(min-width: 1024px) 22vw, 45vw', 'directory' => 'home', 'filename_suffix' => '-proof'),
+        'story' => array('widths' => array(480, 768, 1200, 1600), 'sizes' => '(min-width: 768px) 50vw, 100vw', 'directory' => 'home'),
+        'capability' => array('widths' => array(480, 768, 1200, 1600), 'sizes' => '(min-width: 1024px) 45vw, 100vw', 'directory' => 'home'),
+        'news' => array('widths' => array(320, 480, 768), 'sizes' => '(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw', 'directory' => 'home'),
         'product' => array('widths' => array(320, 480, 768), 'sizes' => '(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw', 'directory' => 'home'),
         'project' => array('widths' => array(320, 480, 768), 'sizes' => '(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw', 'directory' => 'home'),
         'partner' => array('widths' => array(160, 320), 'sizes' => '160px', 'directory' => 'home'),
         'product-thumb' => array('widths' => array(160, 320), 'sizes' => '88px', 'directory' => 'products'),
         'product-card' => array('widths' => array(320, 480, 768), 'sizes' => '(min-width: 1024px) 220px, (min-width: 480px) 50vw, 100vw', 'directory' => 'products'),
         'product-detail' => array('widths' => array(480, 768, 1024), 'sizes' => '(min-width: 1024px) 460px, 100vw', 'directory' => 'products'),
+        'product-gallery' => array('widths' => array(480, 768, 1024), 'sizes' => '(min-width: 1024px) 42vw, calc(100vw - 32px)', 'directory' => 'products'),
+        'product-content' => array('widths' => array(480, 768, 1024), 'sizes' => '(min-width: 1024px) 760px, calc(100vw - 32px)', 'directory' => 'products'),
         'post-thumb' => array('widths' => array(160, 320), 'sizes' => '88px', 'directory' => 'content'),
         'post-card' => array('widths' => array(320, 480, 768), 'sizes' => '(min-width: 1024px) 340px, (min-width: 640px) 40vw, 100vw', 'directory' => 'content'),
         'page-content' => array('widths' => array(480, 768, 1200), 'sizes' => '(min-width: 1024px) 850px, calc(100vw - 32px)', 'directory' => 'content'),
@@ -209,12 +235,13 @@ function tk_picture($image, $slot, $args = array())
     $sources = array('avif' => array(), 'webp' => array());
 
     if ($data['id']) {
+        $filename_suffix = (string) ($config['filename_suffix'] ?? '');
         foreach ($sources as $format => $unused) {
             foreach ($config['widths'] as $candidate) {
                 if ($candidate > $width && count($config['widths']) > 1) {
                     continue;
                 }
-                $relative = 'assets/dist/images/' . $config['directory'] . '/' . $data['id'] . '-' . $candidate . '.' . $format;
+                $relative = 'assets/dist/images/' . $config['directory'] . '/' . $data['id'] . $filename_suffix . '-' . $candidate . '.' . $format;
                 if (file_exists(get_theme_file_path($relative))) {
                     $sources[$format][] = get_theme_file_uri($relative) . ' ' . $candidate . 'w';
                 }
@@ -260,12 +287,51 @@ function tk_home_picture($image, $slot, $args = array())
     return tk_picture($image, $slot, $args);
 }
 
+function tk_home_project_picture($index, $fallback_image, $alt = '')
+{
+    $slugs = array('project-hanam', 'project-dany', 'project-phusan');
+    $slug = $slugs[(int) $index] ?? '';
+    $source_path = $slug ? get_theme_file_path('assets/src/images/projects/' . $slug . '.png') : '';
+    if (!$slug || !is_file($source_path)) {
+        return tk_home_picture($fallback_image, 'project', array('alt' => $alt, 'class' => 'h-full w-full object-cover'));
+    }
+
+    $sizes = '(min-width: 1024px) 55vw, (min-width: 640px) 50vw, 100vw';
+    $sources = array('avif' => array(), 'webp' => array());
+    foreach ($sources as $format => $unused) {
+        foreach (array(320, 480, 768) as $width) {
+            $relative = 'assets/dist/images/home/' . $slug . '-' . $width . '.' . $format;
+            if (file_exists(get_theme_file_path($relative))) {
+                $sources[$format][] = get_theme_file_uri($relative) . ' ' . $width . 'w';
+            }
+        }
+    }
+
+    $html = '<picture class="tk-project-art">';
+    if ($sources['avif']) {
+        $html .= '<source type="image/avif" srcset="' . esc_attr(implode(', ', $sources['avif'])) . '" sizes="' . esc_attr($sizes) . '">';
+    }
+    if ($sources['webp']) {
+        $html .= '<source type="image/webp" srcset="' . esc_attr(implode(', ', $sources['webp'])) . '" sizes="' . esc_attr($sizes) . '">';
+    }
+    $html .= '<img src="' . esc_url(get_theme_file_uri('assets/src/images/projects/' . $slug . '.png')) . '" alt="' . esc_attr($alt) . '" width="1536" height="1024" loading="lazy" decoding="async" sizes="' . esc_attr($sizes) . '"></picture>';
+
+    if (in_array((int) $index, array(0, 2), true)) {
+        $brand = tk_home_image_data($fallback_image);
+        if ($brand['url']) {
+            $html .= '<span class="tk-project-brandmark tk-project-brandmark-' . esc_attr((string) ((int) $index + 1)) . '" aria-hidden="true"><img src="' . esc_url($brand['url']) . '" alt="" width="' . esc_attr((string) ($brand['width'] ?: 600)) . '" height="' . esc_attr((string) ($brand['height'] ?: 600)) . '" loading="lazy" decoding="async"></span>';
+        }
+    }
+
+    return $html;
+}
+
 function tk_home_preload_hero()
 {
     if (!is_front_page()) {
         return;
     }
-    $data = tk_home_image_data(tk_home_field('wpcf-anhbanner-1'));
+    $data = tk_home_image_data(tk_home_hero_image());
     if (!$data['url']) {
         return;
     }
@@ -279,7 +345,7 @@ function tk_home_preload_hero()
     }
     echo '<link rel="preload" as="image" href="' . esc_url($data['url']) . '"';
     if ($srcset) {
-        echo ' imagesrcset="' . esc_attr(implode(', ', $srcset)) . '" imagesizes="100vw" type="image/avif"';
+        echo ' imagesrcset="' . esc_attr(implode(', ', $srcset)) . '" imagesizes="(min-width: 1024px) 50vw, 100vw" type="image/avif"';
     }
     echo ' fetchpriority="high">' . "\n";
 }

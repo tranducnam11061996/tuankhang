@@ -56,6 +56,7 @@ endif;
 add_action('after_setup_theme', 'tuankhang_setup');
 
 require_once get_theme_file_path('/inc/home-tailwind.php');
+require_once get_theme_file_path('/inc/home-components.php');
 require_once get_theme_file_path('/inc/content-tailwind.php');
 require_once get_theme_file_path('/inc/product-tailwind.php');
 
@@ -115,12 +116,34 @@ function tuankhang_enqueue_frontend_assets()
     }
 
     $context = tk_get_frontend_context();
-    tk_enqueue_built_style('tuankhang-' . $context, '/assets/dist/' . $context . '.min.css');
-    tk_enqueue_built_style('tuankhang-site', '/assets/dist/site.min.css', array('tuankhang-' . $context));
+    $style_context = is_singular('san-pham') ? 'product-detail' : $context;
+    tk_enqueue_built_style('tuankhang-site', '/assets/dist/site.min.css');
+    tk_enqueue_built_style('tuankhang-' . $style_context, '/assets/dist/' . $style_context . '.min.css', array('tuankhang-site'));
     tk_enqueue_built_script('tuankhang-site', '/assets/dist/site.min.js');
     tk_enqueue_built_script('tuankhang-' . $context, '/assets/dist/' . $context . '.min.js', array('tuankhang-site'));
 }
 add_action('wp_enqueue_scripts', 'tuankhang_enqueue_frontend_assets', 1);
+
+function tuankhang_preload_interface_fonts()
+{
+    if (is_admin()) {
+        return;
+    }
+
+    $language = function_exists('wpm_get_language') ? (string) wpm_get_language() : 'vi';
+    $files = array('manrope-latin.woff2', 'source-serif-4-latin.woff2');
+    if ($language !== 'en') {
+        array_unshift($files, 'manrope-vietnamese.woff2', 'source-serif-4-vietnamese.woff2');
+    }
+
+    foreach ($files as $file) {
+        printf(
+            '<link rel="preload" href="%s" as="font" type="font/woff2" crossorigin>' . "\n",
+            esc_url(get_theme_file_uri('/assets/dist/fonts/' . $file))
+        );
+    }
+}
+add_action('wp_head', 'tuankhang_preload_interface_fonts', 2);
 
 function tuankhang_prune_tailwind_assets()
 {

@@ -83,12 +83,21 @@ $products = get_posts(array(
 ));
 
 foreach ($products as $post_id) {
-    $attachment_id = get_post_thumbnail_id((int) $post_id);
-    $source = $attachment_id ? get_attached_file($attachment_id) : '';
-    if (!$attachment_id || !is_string($source) || !is_file($source)) continue;
-    [$new, $old] = tk_product_build_derivatives($source, (string) $attachment_id, array(160, 320, 480, 768, 1024), $output_dir);
-    $built += $new;
-    $skipped += $old;
+    $attachment_ids = array_filter(array(get_post_thumbnail_id((int) $post_id)));
+    for ($index = 1; $index <= 5; $index++) {
+        $gallery_id = (int) get_post_meta((int) $post_id, 'tk_product_gallery_image_' . $index, true);
+        if ($gallery_id) $attachment_ids[] = $gallery_id;
+    }
+    if (preg_match_all('/wp-image-(\d+)/', (string) get_post_field('post_content', (int) $post_id), $matches)) {
+        $attachment_ids = array_merge($attachment_ids, array_map('intval', $matches[1]));
+    }
+    foreach (array_values(array_unique(array_map('intval', $attachment_ids))) as $attachment_id) {
+        $source = get_attached_file($attachment_id);
+        if (!is_string($source) || !is_file($source)) continue;
+        [$new, $old] = tk_product_build_derivatives($source, (string) $attachment_id, array(160, 320, 480, 768, 1024), $output_dir);
+        $built += $new;
+        $skipped += $old;
+    }
 }
 
 echo "Ảnh sản phẩm: tạo {$built}, bỏ qua {$skipped}.\n";
