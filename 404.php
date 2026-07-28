@@ -1,37 +1,15 @@
-<?php get_header(); ?>
-
-	<section id="body">
-				<div id="product" class="page-body">
-           
-	<section class="bl-top-header">
-		<div class="uk-container uk-container-center">
-			<div class="bl-head">
-				<h1 class="heading-1"><?php esc_html_e('Đã xảy ra lỗi','tuankhang'); ?></h1>
-			</div>
-
-		</div>
-	</section><!-- bl-top-header -->
-	<section class="bl-main-body">
-		<div class="uk-container uk-container-center">
-			<div class="uk-grid uk-grid-medium">
-                   
-<?php get_sidebar(); ?>    
-    
-				<div class="uk-width-large-3-4 uk-width-medium-3-4 uk-width-small-1-1">
-
-							<div class="bl-panel-head">
-								<h2 class="heading-1"><?php esc_html_e('Rất tiếc, liên kết không tồn tại. Vui lòng thử lại hoặc quay lại trang chủ !','tuankhang'); ?></h2>
-								<div class="prd-body-head"></div>
-							</div>
-							<div class="main-prod">
-							</div><!-- main-prod -->
-
-            </div>
-			</div>
-		</div>
-	</section><!-- bl-main-body -->
-
-</div>    
-	</section><!-- #body -->
-
+<?php
+get_header();
+$title = tk_content_title();
+tk_site_banner($title, tk_content_breadcrumbs());
+?>
+<main id="main-content" class="py-14 md:py-20">
+    <div class="tk-container text-center">
+        <p class="text-7xl font-bold leading-none text-primary/15 md:text-9xl" aria-hidden="true">404</p>
+        <h2 class="mt-5 text-2xl font-bold text-primary md:text-3xl"><?php echo esc_html(tk_site_text('Rất tiếc, liên kết không tồn tại.', 'Sorry, this page does not exist.')); ?></h2>
+        <p class="mx-auto mt-4 max-w-2xl text-base leading-7 text-slate-600"><?php echo esc_html(tk_site_text('Vui lòng thử tìm kiếm lại hoặc quay về trang chủ.', 'Please try another search or return to the homepage.')); ?></p>
+        <div class="mx-auto mt-7 max-w-xl"><?php get_search_form(); ?></div>
+        <a class="tk-btn mt-7" href="<?php echo esc_url(home_url('/')); ?>"><?php echo esc_html(tk_site_text('Về trang chủ', 'Back to homepage')); ?></a>
+    </div>
+</main>
 <?php get_footer(); ?>

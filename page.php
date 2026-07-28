@@ -1,53 +1,27 @@
-<?php get_header(); ?>
-
-	<section id="body">
-				<div id="product" class="page-body">
-           
-	<section class="bl-top-header">
-		<div class="uk-container uk-container-center">
-			<div class="bl-head">
-				<h1 class="heading-1"><?php the_title(); ?></h1>
-			</div>
-
-		</div>
-	</section><!-- bl-top-header -->
-	<section class="bl-main-body">
-		<div class="uk-container uk-container-center">
-			<div class="uk-grid uk-grid-medium">                 
-<?php get_sidebar(); ?>
-<div class="uk-width-large-3-4 uk-width-medium-3-4 uk-width-small-1-1">
-	<div class="bl-panel-head">
-		<h2 class="heading-1"><?php the_title(); ?></h2>
-	</div>
-	<section class="art-detail detail-content">
-		<section class="panel-body" id="contenpagex">
-<?php if (is_page( 'gioi-thieu' )) { ?> 
-			<div class="description detail-content">
-                    <?php
-$content = get_field('wpcf-cau-chuyen-ve-tuan-khang', 61);
-if ($content) {
-    echo apply_filters('the_content', $content);
-}
+<?php
+get_header();
+the_post();
+$page_id = get_the_ID();
+$title = get_the_title();
+tk_site_banner($title, tk_content_breadcrumbs($page_id));
+tk_content_sidebar_drawer();
 ?>
-				
-            </div>
-<?php } ?>             
-			<article class="article detail-content">
-				<div style="text-align: justify;">
+<main id="main-content" class="py-10 md:py-14">
+    <div class="tk-container">
+        <?php tk_content_sidebar_button(); ?>
+        <div class="grid gap-8 lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-10">
+            <aside class="hidden lg:block" aria-label="<?php echo esc_attr(tk_site_text('Điều hướng nội dung', 'Content navigation')); ?>"><?php tk_content_sidebar(); ?></aside>
+            <article class="min-w-0">
+                <h2 class="mb-7 border-b border-slate-200 pb-4 text-2xl font-bold uppercase leading-tight text-primary md:text-[28px]"><?php echo esc_html($title); ?></h2>
+                <div class="tk-content">
+                    <?php if (is_page(63)) :
+                        $story = function_exists('get_field') ? get_field('wpcf-cau-chuyen-ve-tuan-khang', 61) : get_post_meta(61, 'wpcf-cau-chuyen-ve-tuan-khang', true);
+                        if ($story) echo apply_filters('the_content', $story);
+                    endif; ?>
                     <?php the_content(); ?>
-                </div>		
-            </article><!-- .article -->
-		</section><!-- .panel-body -->
-		<footer class="panel-foot">
-
-		</footer>
-	</section><!-- .art-detail -->	
-</div>
-			</div>
-		</div>
-	</section><!-- bl-main-body -->
-
-</div>    
-	</section><!-- #body -->
-
+                </div>
+            </article>
+        </div>
+    </div>
+</main>
 <?php get_footer(); ?>

@@ -1,28 +1,14 @@
 <?php
 /*
-
 Template Name: Cài Đặt
-
 */
+get_header();
+the_post();
+tk_site_banner(get_the_title(), tk_content_breadcrumbs(get_the_ID()));
 ?>
-<?php get_header(); ?>
-
-
-	<section id="body">
-				<div id="product" class="page-body">
-           
-	<section class="bl-top-header">
-		<div class="uk-container uk-container-center">
-			<div class="bl-head">
-				<h1 class="heading-1"><?php the_title(); ?></h1>
-			</div>
-
-		</div>
-	</section><!-- bl-top-header -->
-    
-    
-</div>    
-	</section><!-- #body -->
-
-
+<main id="main-content" class="py-10 md:py-14">
+    <div class="tk-container">
+        <div class="tk-content"><?php the_content(); ?></div>
+    </div>
+</main>
 <?php get_footer(); ?>

@@ -56,39 +56,106 @@ endif;
 add_action('after_setup_theme', 'tuankhang_setup');
 
 require_once get_theme_file_path('/inc/home-tailwind.php');
+require_once get_theme_file_path('/inc/home-components.php');
+require_once get_theme_file_path('/inc/content-tailwind.php');
+require_once get_theme_file_path('/inc/product-tailwind.php');
 
-/**
- * Keep the legacy frontend untouched on inner pages while the homepage uses a
- * self-contained Tailwind bundle with no jQuery runtime.
- */
-function tuankhang_enqueue_frontend_assets()
+function tk_is_product_search()
+{
+    if (!is_search()) {
+        return false;
+    }
+    $post_type = get_query_var('post_type');
+    return $post_type === 'san-pham' || (is_array($post_type) && in_array('san-pham', $post_type, true));
+}
+
+function tk_is_product_tailwind_context()
+{
+    return is_post_type_archive('san-pham')
+        || is_tax('danh-muc')
+        || is_singular('san-pham')
+        || tk_is_product_search();
+}
+
+function tk_is_tailwind_context()
+{
+    return !is_admin();
+}
+
+function tk_get_frontend_context()
 {
     if (is_front_page()) {
-        $css_path = get_theme_file_path('/assets/dist/home.min.css');
-        $js_path = get_theme_file_path('/assets/dist/home.min.js');
-        if (is_file($css_path)) {
-            wp_enqueue_style('tuankhang-home', get_theme_file_uri('/assets/dist/home.min.css'), array(), (string) filemtime($css_path));
-        }
-        if (is_file($js_path)) {
-            wp_enqueue_script('tuankhang-home', get_theme_file_uri('/assets/dist/home.min.js'), array(), (string) filemtime($js_path), array('in_footer' => true, 'strategy' => 'defer'));
-        }
+        return 'home';
+    }
+    if (tk_is_product_tailwind_context()) {
+        return 'products';
+    }
+    return 'content';
+}
+
+function tk_enqueue_built_style($handle, $relative, $dependencies = array())
+{
+    $path = get_theme_file_path($relative);
+    if (is_file($path)) {
+        wp_enqueue_style($handle, get_theme_file_uri($relative), $dependencies, (string) filemtime($path));
+    }
+}
+
+function tk_enqueue_built_script($handle, $relative, $dependencies = array())
+{
+    $path = get_theme_file_path($relative);
+    if (is_file($path)) {
+        wp_enqueue_script($handle, get_theme_file_uri($relative), $dependencies, (string) filemtime($path), array('in_footer' => true, 'strategy' => 'defer'));
+    }
+}
+
+function tuankhang_enqueue_frontend_assets()
+{
+    if (is_admin()) {
         return;
     }
 
-    wp_deregister_script('jquery');
-    wp_register_script('jquery', 'https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js', array(), '1.11.1', false);
-    wp_enqueue_script('jquery');
+    $context = tk_get_frontend_context();
+    $style_context = is_singular('san-pham') ? 'product-detail' : $context;
+    tk_enqueue_built_style('tuankhang-site', '/assets/dist/site.min.css');
+    tk_enqueue_built_style('tuankhang-' . $style_context, '/assets/dist/' . $style_context . '.min.css', array('tuankhang-site'));
+    tk_enqueue_built_script('tuankhang-site', '/assets/dist/site.min.js');
+    tk_enqueue_built_script('tuankhang-' . $context, '/assets/dist/' . $context . '.min.js', array('tuankhang-site'));
 }
 add_action('wp_enqueue_scripts', 'tuankhang_enqueue_frontend_assets', 1);
 
-function tuankhang_prune_home_assets()
+function tuankhang_preload_interface_fonts()
 {
-    if (!is_front_page()) {
+    if (is_admin()) {
+        return;
+    }
+
+    $language = function_exists('wpm_get_language') ? (string) wpm_get_language() : 'vi';
+    $files = array('manrope-latin.woff2', 'source-serif-4-latin.woff2');
+    if ($language !== 'en') {
+        array_unshift($files, 'manrope-vietnamese.woff2', 'source-serif-4-vietnamese.woff2');
+    }
+
+    foreach ($files as $file) {
+        printf(
+            '<link rel="preload" href="%s" as="font" type="font/woff2" crossorigin>' . "\n",
+            esc_url(get_theme_file_uri('/assets/dist/fonts/' . $file))
+        );
+    }
+}
+add_action('wp_head', 'tuankhang_preload_interface_fonts', 2);
+
+function tuankhang_prune_tailwind_assets()
+{
+    if (is_admin()) {
         return;
     }
 
     $style_handles = array('contact-form-7', 'wp-pagenavi', 'wpm-main');
-    $script_handles = array('jquery', 'jquery-core', 'jquery-migrate', 'contact-form-7', 'wpcf7-recaptcha', 'wpm-switcher-block-script');
+    $script_handles = array('jquery', 'jquery-core', 'jquery-migrate', 'wpm-switcher-block-script');
+    if (!is_singular('san-pham')) {
+        $script_handles = array_merge($script_handles, array('contact-form-7', 'wpcf7-recaptcha'));
+    }
     foreach ($style_handles as $handle) {
         wp_dequeue_style($handle);
         wp_deregister_style($handle);
@@ -98,11 +165,11 @@ function tuankhang_prune_home_assets()
         wp_deregister_script($handle);
     }
 }
-add_action('wp_enqueue_scripts', 'tuankhang_prune_home_assets', 999);
+add_action('wp_enqueue_scripts', 'tuankhang_prune_tailwind_assets', 999);
 add_image_size('image-cat-trangchu', 274, 240, true);
 function remove_max_srcset_image_width($max_width)
 {
-    return is_front_page() ? $max_width : false;
+    return $max_width;
 }
 
 function removeHeadLinks()
@@ -190,10 +257,22 @@ add_filter('the_content', 'attachment_image_link_remove_filter');
 add_filter('max_srcset_image_width', 'remove_max_srcset_image_width');
 function wdo_disable_srcset($sources)
 {
-    return is_front_page() ? $sources : false;
+    return $sources;
 }
 
 add_filter('wp_calculate_image_srcset', 'wdo_disable_srcset');
+
+function tk_disable_emoji_assets_for_tailwind()
+{
+    if (is_admin()) {
+        return;
+    }
+    remove_action('wp_head', 'print_emoji_detection_script', 7);
+    remove_action('wp_print_styles', 'print_emoji_styles');
+    remove_action('wp_print_styles', 'wp_enqueue_emoji_styles');
+}
+add_action('wp', 'tk_disable_emoji_assets_for_tailwind', 0);
+
 add_action('admin_init', 'hide_editor');
 function hide_editor()
 {
@@ -220,7 +299,3 @@ function custom_admin_css_dinh()
 }
 
 add_action('admin_head', 'custom_admin_css_dinh');
-
-include(get_theme_file_path() . '/inc/customhtmlmenu.php');
-
-?>

@@ -1,0 +1,48 @@
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme" layer(theme);
+@import "tailwindcss/utilities" layer(utilities) source(none);
+@source "../../archive-san-pham.php";
+@source "../../taxonomy-danh-muc.php";
+@source "../../search.php";
+@source "../../inc/product-tailwind.php";
+@source "../../inc/content-tailwind.php";
+@source "../../template-parts/product/*.php";
+
+@theme {
+  --color-primary: #013974;
+  --color-button: #104099;
+  --color-accent: #d80f19;
+  --color-footer: #002d5c;
+  --color-footer-deep: #001c3a;
+  --font-sans: "Manrope", Arial, Helvetica, sans-serif;
+  --radius-card: 15px;
+  --shadow-card: 0 8px 24px rgb(1 57 116 / 10%);
+}
+
+.tk-product-filter-drawer { transform: translateX(-100%); transition: transform .25s ease; }
+.tk-product-filter-overlay { opacity: 0; visibility: hidden; transition: opacity .25s ease, visibility .25s ease; }
+body.tk-product-filter-open { overflow: hidden; }
+body.tk-product-filter-open .tk-product-filter-drawer { transform: translateX(0); }
+body.tk-product-filter-open .tk-product-filter-overlay { opacity: 1; visibility: visible; }
+[data-category-toggle][aria-expanded="true"] svg { transform: rotate(180deg); }
+
+.tk-page-link .page-numbers {
+  display: inline-flex;
+  min-width: 44px;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #cbd5e1;
+  border-radius: .5rem;
+  padding: .5rem .75rem;
+  color: #013974;
+  font-weight: 700;
+}
+.tk-page-link .page-numbers:hover,
+.tk-page-link .page-numbers:focus-visible,
+.tk-page-link .page-numbers.current { border-color: #013974; background: #013974; color: #fff; }
+
+@media (prefers-reduced-motion: reduce) {
+  .tk-product-filter-drawer,
+  .tk-product-filter-overlay { transition: none; }
+}

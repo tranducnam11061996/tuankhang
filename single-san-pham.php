@@ -1,335 +1,422 @@
-<?php get_header(); ?>
+<?php
+get_header();
 
+if (!have_posts()) {
+    get_footer();
+    return;
+}
 
-    <section id="body">
+the_post();
+$product_id = get_the_ID();
+$title = get_the_title();
+$term = tk_product_primary_term($product_id);
+$short_description = (string) get_post_meta($product_id, 'wpcf-mo-ta-ngan', true);
+$tagline = tk_product_premium_tagline($product_id, $short_description);
+$gallery = tk_product_gallery_items($product_id);
+$highlights = tk_product_premium_highlights($product_id);
+$specs = tk_product_premium_specs($product_id);
+$catalogue = tk_product_catalogue_data($product_id);
+$video_embed = tk_product_video_embed_url($product_id);
+$rich_content = tk_product_normalize_rich_content($product_id);
+$hotline = (string) tk_home_field('wpcf-so-hotline');
+$phone = preg_replace('/[^0-9+]/', '', $hotline);
+$related_ids = tk_product_related_ids($product_id, 4);
+$breadcrumbs = tk_product_breadcrumbs($product_id);
+$section_nav = array();
+$dialog_style_path = get_theme_file_path('/assets/dist/product-dialogs.min.css');
+$dialog_style_url = is_file($dialog_style_path)
+    ? add_query_arg('ver', (string) filemtime($dialog_style_path), get_theme_file_uri('/assets/dist/product-dialogs.min.css'))
+    : '';
 
+if ($short_description) {
+    $section_nav[] = array('id' => 'product-overview', 'label' => tk_home_text('Tổng quan', 'Overview'));
+}
+if ($highlights) {
+    $section_nav[] = array('id' => 'product-highlights', 'label' => tk_home_text('Điểm nổi bật', 'Highlights'));
+}
+if ($specs) {
+    $section_nav[] = array('id' => 'product-specifications', 'label' => tk_home_text('Thông số', 'Specifications'));
+}
+if ($video_embed) {
+    $section_nav[] = array('id' => 'product-video', 'label' => tk_home_text('Video', 'Video'));
+}
+if ($rich_content) {
+    $section_nav[] = array('id' => 'product-details', 'label' => tk_home_text('Chi tiết', 'Details'));
+}
+$section_nav[] = array('id' => 'product-consultation', 'label' => tk_home_text('Tư vấn', 'Consultation'));
+?>
 
-        <div id="production" class="page-body">
+<main
+    id="main-content"
+    class="tk-product-detail-page"
+    data-product-detail
+    data-product-id="<?php echo esc_attr((string) $product_id); ?>"
+    data-product-slug="<?php echo esc_attr((string) get_post_field('post_name', $product_id)); ?>"
+    data-product-taxonomy="<?php echo esc_attr($term instanceof WP_Term ? $term->name : ''); ?>"
+    data-product-dialog-style="<?php echo esc_url($dialog_style_url); ?>"
+>
+    <nav class="tk-product-breadcrumb" aria-label="<?php echo esc_attr(tk_home_text('Đường dẫn trang', 'Breadcrumb')); ?>">
+        <div class="tk-container">
+            <ol>
+                <?php foreach ($breadcrumbs as $index => $item) : ?>
+                    <li>
+                        <?php if ($index) : ?>
+                            <svg aria-hidden="true" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 0 1 .02-1.06L10.94 10 7.23 6.29a.75.75 0 0 1 1.06-1.06l4.24 4.24a.75.75 0 0 1 0 1.06l-4.24 4.24a.75.75 0 0 1-1.08 0Z" clip-rule="evenodd"/></svg>
+                        <?php endif; ?>
+                        <?php if (!empty($item['url']) && !is_wp_error($item['url'])) : ?>
+                            <a href="<?php echo esc_url($item['url']); ?>"><?php echo esc_html($item['label']); ?></a>
+                        <?php else : ?>
+                            <span aria-current="page"><?php echo esc_html($item['label']); ?></span>
+                        <?php endif; ?>
+                    </li>
+                <?php endforeach; ?>
+            </ol>
+        </div>
+    </nav>
 
-            <?php if (have_posts()) : while (have_posts()) : the_post(); ?>
+    <article>
+        <section class="tk-product-hero" aria-labelledby="site-page-title" data-product-hero>
+            <div class="tk-product-hero-grid tk-container">
+                <div class="tk-product-hero-copy">
+                    <?php if ($term instanceof WP_Term) : ?>
+                        <a class="tk-product-eyebrow" href="<?php echo esc_url(get_term_link($term)); ?>">
+                            <span><?php echo esc_html($term->name); ?></span>
+                            <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m7 4 6 6-6 6"/></svg>
+                        </a>
+                    <?php else : ?>
+                        <span class="tk-product-eyebrow"><?php echo esc_html(tk_home_text('Giải pháp nha khoa', 'Dental solution')); ?></span>
+                    <?php endif; ?>
 
+                    <h1 id="site-page-title"><?php echo esc_html($title); ?></h1>
+                    <?php if ($tagline) : ?><p class="tk-product-tagline"><?php echo esc_html($tagline); ?></p><?php endif; ?>
+
+                    <?php if ($specs) : ?>
+                        <dl class="tk-product-hero-facts">
+                            <?php foreach (array_slice($specs, 0, 3) as $spec) : ?>
+                                <div><dt><?php echo esc_html($spec['label']); ?></dt><dd><?php echo esc_html($spec['value']); ?></dd></div>
+                            <?php endforeach; ?>
+                        </dl>
+                    <?php endif; ?>
+
+                    <div class="tk-product-hero-actions">
+                        <button
+                            type="button"
+                            class="tk-product-cta tk-product-cta-primary"
+                            data-product-modal-open
+                            data-cta-source="hero"
+                            data-tk-event="tk_product_cta_click"
+                            data-tk-action="consultation"
+                            data-tk-placement="hero"
+                        >
+                            <span><?php echo esc_html(tk_home_text('Nhận tư vấn chuyên môn', 'Request expert consultation')); ?></span>
+                            <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 10h12m-4-4 4 4-4 4"/></svg>
+                        </button>
+                        <?php if ($phone) : ?>
+                            <a
+                                class="tk-product-cta tk-product-cta-secondary"
+                                href="tel:<?php echo esc_attr($phone); ?>"
+                                rel="nofollow"
+                                data-tk-event="tk_product_cta_click"
+                                data-tk-action="hotline"
+                                data-tk-placement="hero"
+                            >
+                                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.69 2.8a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.33 1.85.56 2.81.69A2 2 0 0 1 22 16.92Z"/></svg>
+                                <span><?php echo esc_html(tk_home_text('Gọi chuyên gia', 'Call an expert')); ?></span>
+                            </a>
+                        <?php endif; ?>
+                    </div>
+
+                    <?php if ($catalogue) : ?>
+                        <a
+                            class="tk-product-catalogue-link"
+                            href="<?php echo esc_url($catalogue['url']); ?>"
+                            target="_blank"
+                            rel="noopener"
+                            data-tk-event="tk_product_catalogue_click"
+                            data-tk-action="catalogue"
+                            data-tk-placement="hero"
+                        >
+                            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M12 18v-6m-3 3 3 3 3-3"/></svg>
+                            <span><?php echo esc_html(tk_home_text('Xem catalogue / tài liệu kỹ thuật', 'View catalogue / technical document')); ?></span>
+                        </a>
+                    <?php endif; ?>
+
+                    <p class="tk-product-advisory-note"><?php echo esc_html(tk_home_text('Đội ngũ Tuấn Khang hỗ trợ lựa chọn giải pháp phù hợp với nhu cầu lâm sàng và vận hành của phòng khám.', 'Tuan Khang supports product selection for your clinical and practice requirements.')); ?></p>
+                </div>
+
+                <div class="tk-product-gallery" data-product-gallery>
+                    <?php if ($gallery) : ?>
+                        <button
+                            type="button"
+                            class="tk-product-gallery-main"
+                            data-product-gallery-zoom
+                            aria-label="<?php echo esc_attr(sprintf(tk_home_text('Phóng to ảnh %s', 'Enlarge image of %s'), $title)); ?>"
+                        >
+                            <span class="tk-product-gallery-stage" data-product-gallery-stage>
+                                <?php foreach ($gallery as $index => $image) : ?>
+                                    <span class="tk-product-gallery-slide" data-product-gallery-slide="<?php echo esc_attr((string) $index); ?>"<?php echo $index ? ' hidden aria-hidden="true"' : ' aria-hidden="false"'; ?>>
+                                        <?php
+                                        echo tk_picture(
+                                            $image,
+                                            'product-gallery',
+                                            array(
+                                                'alt' => $image['alt'] ?: $title,
+                                                'loading' => $index === 0 ? 'eager' : 'lazy',
+                                                'fetchpriority' => $index === 0 ? 'high' : 'auto',
+                                                'class' => 'tk-product-gallery-image',
+                                            )
+                                        );
+                                        ?>
+                                    </span>
+                                <?php endforeach; ?>
+                            </span>
+                            <span class="tk-product-gallery-zoom-label">
+                                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4m-5-8v6m-3-3h6"/></svg>
+                                <?php echo esc_html(tk_home_text('Xem ảnh lớn', 'View larger')); ?>
+                            </span>
+                        </button>
+
+                        <?php if (count($gallery) > 1) : ?>
+                            <div class="tk-product-gallery-thumbs" role="group" aria-label="<?php echo esc_attr(tk_home_text('Chọn ảnh sản phẩm', 'Choose product image')); ?>">
+                                <?php foreach ($gallery as $index => $image) : ?>
+                                    <button
+                                        type="button"
+                                        class="tk-product-gallery-thumb"
+                                        data-product-gallery-thumb="<?php echo esc_attr((string) $index); ?>"
+                                        aria-pressed="<?php echo $index === 0 ? 'true' : 'false'; ?>"
+                                        aria-label="<?php echo esc_attr(sprintf(tk_home_text('Xem ảnh %d', 'View image %d'), $index + 1)); ?>"
+                                    >
+                                        <?php echo tk_picture($image, 'product-thumb', array('alt' => '', 'class' => 'tk-product-gallery-thumb-image')); ?>
+                                    </button>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
+                    <?php else : ?>
+                        <div class="tk-product-gallery-empty">
+                            <svg aria-hidden="true" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 12h36a4 4 0 0 1 4 4v32a4 4 0 0 1-4 4H14a4 4 0 0 1-4-4V16a4 4 0 0 1 4-4Z"/><circle cx="24" cy="25" r="5"/><path d="m12 44 12-11 9 8 7-6 12 11"/></svg>
+                            <span><?php echo esc_html(tk_home_text('Hình ảnh đang được cập nhật', 'Image coming soon')); ?></span>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </section>
+
+        <section class="tk-product-proof" aria-label="<?php echo esc_attr(tk_home_text('Cam kết dịch vụ Tuấn Khang', 'Tuan Khang service commitments')); ?>">
+            <div class="tk-container">
                 <?php
-
-                $terms = get_the_terms($post->ID, 'danh-muc');
-                foreach ($terms as $term) {
-                    $abc = $term->term_id;
-                    $abc1 = $term->name;
-                    $term_link = get_term_link($term);
-                };
-
-                ?>
-
-                <section class="bl-top-header">
-
-                    <div class="uk-container uk-container-center">
-
-                        <div class="bl-head">
-
-                            <h1 class="heading-1"><?php the_title(); ?></h1>
-
-                        </div>
-
-                        <div class="bl-breadcrumb">
-
-                            <ul class="uk-list uk-clearfix">
-
-                                <li><a href="<?php echo get_home_url(); ?>"
-                                       title="<?php esc_html_e("Trang Chủ", "tuankhang"); ?>"><?php esc_html_e("Trang Chủ", "tuankhang"); ?></a>
-                                </li>
-
-                                <li class="bl-active"><a href="<?php echo $term_link; ?>"
-                                                         title="<?php echo $abc1 ?>"><?php echo $abc1 ?></a></li>
-
-                                <li class="bl-active"><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></li>
-
-                            </ul>
-
-                        </div>
-
+                $proof_items = array(
+                    array('title' => tk_home_text('Sản phẩm chính hãng', 'Authentic products'), 'description' => tk_home_text('Nguồn gốc minh bạch', 'Transparent sourcing'), 'icon' => 'shield'),
+                    array('title' => tk_home_text('Tư vấn kỹ thuật', 'Technical advice'), 'description' => tk_home_text('Đồng hành cùng bác sĩ', 'Supporting clinicians'), 'icon' => 'clinical'),
+                    array('title' => tk_home_text('Hỗ trợ 24/7', '24/7 support'), 'description' => tk_home_text('Phản hồi khi cần thiết', 'Responsive assistance'), 'icon' => 'support'),
+                    array('title' => tk_home_text('Phân phối toàn quốc', 'Nationwide delivery'), 'description' => tk_home_text('Hà Nội & TP. Hồ Chí Minh', 'Hanoi & Ho Chi Minh City'), 'icon' => 'delivery'),
+                );
+                foreach ($proof_items as $proof) : ?>
+                    <div class="tk-product-proof-item">
+                        <?php if ($proof['icon'] === 'shield') : ?>
+                            <svg class="tk-product-proof-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3 5 6v5c0 5 3.1 8.3 7 10 3.9-1.7 7-5 7-10V6Z"/><path d="m9 12 2 2 4-5"/></svg>
+                        <?php elseif ($proof['icon'] === 'clinical') : ?>
+                            <svg class="tk-product-proof-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M8 3v4a4 4 0 0 0 8 0V3M5 3h3m8 0h3"/><path d="M12 11v3a5 5 0 0 0 10 0v-1"/><circle cx="21" cy="10" r="2"/></svg>
+                        <?php elseif ($proof['icon'] === 'support') : ?>
+                            <svg class="tk-product-proof-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 13a8 8 0 0 1 16 0v6a2 2 0 0 1-2 2h-3"/><path d="M4 13h3v6H4a2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2Zm16 0h-3v6h3a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2Z"/></svg>
+                        <?php else : ?>
+                            <svg class="tk-product-proof-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 6h11v11H3Z"/><path d="M14 10h4l3 3v4h-7Z"/><circle cx="7" cy="19" r="2"/><circle cx="18" cy="19" r="2"/></svg>
+                        <?php endif; ?>
+                        <strong><?php echo esc_html($proof['title']); ?></strong>
                     </div>
-
-                </section><!-- bl-top-header -->
-
-
-                <section class="bl-main-body prd-detail">
-
-                    <div class="uk-container uk-container-center">
-
-                        <div class="uk-grid uk-grid-medium">
-
-                            <div class="uk-width-large-4-4 uk-width-medium-4-4 uk-width-small-1-1">
-
-                                <section class="detail uk-clearfix">
-
-                                    <div class="uk-grid uk-grid-small">
-
-                                        <div class="uk-width-large-2-5 uk-width-medium-2-5 uk-width-small-1-1 paddingleft0 paddingright10">
-
-                                            <?php the_post_thumbnail('thumbnail'); ?>
-
-                                        </div>
-
-                                        <div class="uk-width-large-3-5 uk-width-medium-2-5 uk-width-small-1-1 paddingright15">
-
-                                            <div class="panel-head">
-
-                                                <h2 class="heading-2"><?php the_title(); ?></h2>
-
-                                            </div>
-
-                                            <div class="mt-2" style="font-size: 15px;" id="motanganx">
-
-                                                <?php
-
-                                                 $hangsanxuat = get_field('wpcf-hang-sx');
-                                                 $model = get_field('wpcf-model');
-                                                 $xuatxu = get_field('wpcf-xuat-xu');
-
-                                                if ($model) {
-
-                                                    ?>
-
-                                                    <p><?php esc_html_e("Model", "tuankhang"); ?>:
-                                                        <strong><?php echo $model; ?></strong></p>
-
-                                                    <?php
-
-                                                };
-
-                                                if ($hangsanxuat) {
-
-                                                    ?>
-
-                                                    <p><?php esc_html_e("Hãng", "tuankhang"); ?>:
-                                                        <strong><?php echo $hangsanxuat; ?></strong></p>
-
-                                                    <?php
-
-                                                };
-
-                                                if ($xuatxu) {
-
-                                                    ?>
-
-                                                    <p><?php esc_html_e("Xuất Xứ", "tuankhang"); ?>:
-                                                        <strong><?php echo $xuatxu; ?></strong></p>
-
-                                                <?php } ?>
-
-                                                <?php if (get_field('wpcf-mo-ta-ngan')): ?>
-                                                 <p><?php the_field('wpcf-mo-ta-ngan'); ?></p>
-                                                 <?php endif; ?>
-
-                                            </div>
-
-                                            <style>
-                                                #motanganx img {
-                                                    margin: 15px auto;
-                                                }
-                                            </style>
-                                            <div class="policy">
-
-                                                <h3 class="i-title"><i
-                                                            class="fa fa-shield"></i> <?php esc_html_e("Lợi ích khi mua hàng tại Tuấn Khang", "tuankhang"); ?></h3>
-
-                                                <ul>
-
-                                                    <li xss="removed" style="list-style: none"><i class="fa fa-user"
-                                                                                                  aria-hidden="true"></i>
-                                                        <?php esc_html_e("Nhà cung cấp uy tín", "tuankhang"); ?>
-                                                    </li>
-
-                                                    <li xss="removed" style="list-style: none"><i
-                                                                class="fa fa-product-hunt" aria-hidden="true"></i> <?php esc_html_e("Sản phẩm chất lượng, giá cả hợp lý", "tuankhang"); ?>
-                                                    </li>
-
-                                                    <li xss="removed" style="list-style: none"><i class="fa fa-repeat"
-                                                                                                  aria-hidden="true"></i>
-                                                        <?php esc_html_e("Thời gian bảo hành 12 tháng, dịch vụ chuyên nghiệp", "tuankhang"); ?>
-                                                    </li>
-
-                                                    <li xss="removed" style="list-style: none"><i class="fa fa-calendar"
-                                                                                                  aria-hidden="true"></i>
-                                                        <?php esc_html_e("Hàng có sẵn có thể giao ngay", "tuankhang"); ?>
-                                                    </li>
-
-                                                    <li xss="removed" style="list-style: none"><i class="fa fa-gift"
-                                                                                                  aria-hidden="true"></i>
-                                                        <?php esc_html_e("Ưu đãi khi mua hàng với số lượng lớn", "tuankhang"); ?>
-                                                    </li>
-
-                                                </ul>
-
-                                            </div>
-
-                                        </div>
-                                    </div>
-
-
-                                    <div class="tab-content">
-
-                                        <ul class="uk-list uk-clearfix nav-tabs ulgachchan">
-
-                                            <li class="uk-active"><span class="active"><?php esc_html_e("MÔ TẢ CHI TIẾT", "tuankhang"); ?></span></li>
-
-                                        </ul>
-
-                                        <div id="tabContent" class="uk-switcher tab-content">
-
-                                            <div aria-hidden="false" class="uk-active">
-
-                                                <article class="article detail-content">
-
-                                                    <?php the_content(); ?>
-
-                                                    <style>
-
-                                                        #tabContent img {
-                                                            width: 100%;
-                                                            margin: 15px auto;
-                                                        }
-
-                                                        #tabContent {
-
-                                                            font-size: 16px;
-
-                                                            clear: both;
-
-                                                            margin-top: 20px
-
-                                                        }
-
-                                                    </style>
-
-                                                </article>
-
-                                            </div>
-
-                                        </div> <!-- tâb-menu -->
-
-                                    </div><!-- tab-content -->
-
-
-                                </section><!-- detail -->
-
-
-                            </div><!-- uk-width-large-3-4 uk-width-medium-3-4 uk-width-small-1-1 -->
-
+                <?php endforeach; ?>
+            </div>
+        </section>
+
+        <nav class="tk-product-section-nav" data-product-section-nav aria-label="<?php echo esc_attr(tk_home_text('Điều hướng nội dung sản phẩm', 'Product content navigation')); ?>">
+            <div class="tk-container">
+                <?php foreach ($section_nav as $index => $nav_item) : ?>
+                    <a href="#<?php echo esc_attr($nav_item['id']); ?>" data-product-section-link="<?php echo esc_attr($nav_item['id']); ?>"<?php echo $index === 0 ? ' class="is-active" aria-current="location"' : ''; ?>>
+                        <?php echo esc_html($nav_item['label']); ?>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+        </nav>
+
+        <div class="tk-product-body">
+            <?php if ($short_description) : ?>
+                <section id="product-overview" class="tk-product-section tk-product-overview" data-product-section data-reveal aria-labelledby="product-overview-title">
+                    <div class="tk-container tk-product-section-grid">
+                        <div class="tk-product-section-heading">
+                            <span>01</span>
+                            <p><?php echo esc_html(tk_home_text('Tổng quan', 'Overview')); ?></p>
+                            <h2 id="product-overview-title"><?php echo esc_html(tk_home_text('Giải pháp được lựa chọn cho thực hành nha khoa hiện đại', 'A solution for modern dental practice')); ?></h2>
                         </div>
-
+                        <div class="tk-product-overview-copy"><?php echo wp_kses_post($short_description); ?></div>
                     </div>
-
-                </section><!-- bl-main-body -->
-
-
-            <?php endwhile;
-                wp_reset_postdata(); ?>
-
+                </section>
             <?php endif; ?>
 
+            <?php if ($highlights) : ?>
+                <section id="product-highlights" class="tk-product-section tk-product-highlights" data-product-section data-reveal aria-labelledby="product-highlights-title">
+                    <div class="tk-container">
+                        <div class="tk-product-section-heading tk-product-section-heading-horizontal">
+                            <span>02</span>
+                            <div><p><?php echo esc_html(tk_home_text('Giá trị nổi bật', 'Key value')); ?></p><h2 id="product-highlights-title"><?php echo esc_html(tk_home_text('Điểm khác biệt của sản phẩm', 'What sets this product apart')); ?></h2></div>
+                        </div>
+                        <div class="tk-product-highlight-grid">
+                            <?php foreach ($highlights as $index => $highlight) : ?>
+                                <article class="tk-product-highlight-card" data-reveal-item>
+                                    <span class="tk-product-highlight-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3v18M3 12h18"/><circle cx="12" cy="12" r="8"/></svg>
+                                    </span>
+                                    <span class="tk-product-highlight-index"><?php echo esc_html(str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT)); ?></span>
+                                    <h3><?php echo esc_html($highlight['title']); ?></h3>
+                                    <?php if ($highlight['description']) : ?><p><?php echo esc_html($highlight['description']); ?></p><?php endif; ?>
+                                </article>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                </section>
+            <?php endif; ?>
 
-            <section class="h-product">
-                <?php
-                $terms = get_the_terms($post->ID, 'danh-muc');
-                foreach ($terms as $term) {
-                    $abc = $term->term_id;
-                    $abc1 = $term->name;
-                    $term_link = get_term_link($term);
-                };
-                if ($abc) {
-                    $args = array(
-                        'post_type' => 'san-pham',
-                        'tax_query' => array(
-                            array(
-                                'taxonomy' => 'danh-muc',
-                                'field' => 'id',
-                                'terms' => $abc
-                            )
-                        ),
-                        'post__not_in' => array($post->ID),
-                        'showposts' => 4,
-                        'orderby' => 'rand'
-                    );
-                    $cungloai = new WP_Query($args);
-                    if ($cungloai->have_posts()) { ?>
+            <?php if ($specs) : ?>
+                <section id="product-specifications" class="tk-product-section tk-product-specifications" data-product-section data-reveal aria-labelledby="product-specifications-title">
+                    <div class="tk-container tk-product-section-grid">
+                        <div class="tk-product-section-heading">
+                            <span>03</span>
+                            <p><?php echo esc_html(tk_home_text('Dữ liệu sản phẩm', 'Product data')); ?></p>
+                            <h2 id="product-specifications-title"><?php echo esc_html(tk_home_text('Thông số & thông tin kỹ thuật', 'Specifications & technical information')); ?></h2>
+                        </div>
+                        <dl class="tk-product-spec-list">
+                            <?php foreach ($specs as $spec) : ?>
+                                <div><dt><?php echo esc_html($spec['label']); ?></dt><dd><?php echo esc_html($spec['value']); ?></dd></div>
+                            <?php endforeach; ?>
+                        </dl>
+                    </div>
+                </section>
+            <?php endif; ?>
 
-                        <div class="uk-container uk-container-center">
-                            <div class="h-panel-head">
-                                <h3 class="heading-2"><a href="." title=""><?php esc_html_e("Sản phẩm liên quan", "tuankhang"); ?></a></h3>
-                            </div>
-                            <div class="panel-body main-prod">
-                                <div class="uk-grid uk-grid-small mt20">
+            <?php if ($video_embed) : ?>
+                <section id="product-video" class="tk-product-section tk-product-video" data-product-section data-reveal aria-labelledby="product-video-title">
+                    <div class="tk-container">
+                        <div class="tk-product-section-heading tk-product-section-heading-horizontal">
+                            <span>04</span>
+                            <div><p><?php echo esc_html(tk_home_text('Trình diễn', 'Demonstration')); ?></p><h2 id="product-video-title"><?php echo esc_html(tk_home_text('Khám phá sản phẩm qua video', 'Explore the product in video')); ?></h2></div>
+                        </div>
+                        <div class="tk-product-video-frame" data-product-video>
+                            <button type="button" data-product-video-play data-video-src="<?php echo esc_url($video_embed); ?>">
+                                <span class="tk-product-video-play-icon"><svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor"><path d="m9 7 8 5-8 5Z"/></svg></span>
+                                <span><?php echo esc_html(tk_home_text('Phát video giới thiệu sản phẩm', 'Play product introduction')); ?></span>
+                            </button>
+                        </div>
+                    </div>
+                </section>
+            <?php endif; ?>
 
-                                    <?php while ($cungloai->have_posts()) : $cungloai->the_post(); ?>
-                                        <?php include(TEMPLATEPATH . '/inc/1sanpham.php'); ?>
-                                    <?php endwhile; ?>
-                                </div>
-                            </div>
-                        </div><!-- panel-body -->
-                    <?php } else {
-                        $args1 = array(
-                            'post_type' => 'san-pham',
-                            'tax_query' => array(
-                                array('taxonomy' => 'danh-muc',
-                                    'field' => 'id',
-                                    'terms' => $abc,
-                                    'operator' => 'NOT IN'
-                                )
-                            ),
-                            'post__not_in' => array($post->ID),
-                            'showposts' => 4,
-                            'orderby' => 'rand'
-                        );
-                        $camera = new WP_Query($args1);
-                        if ($camera->have_posts()): ?>
-                            <div class="uk-container uk-container-center">
-                                <div class="h-panel-head">
-                                    <h3 class="heading-2"><a href="." title=""><?php esc_html_e("Nhà", "tuankhang"); ?>Sản phẩm khác</a></h3>
-                                </div>
-                                <div class="panel-body main-prod">
-                                    <div class="uk-grid uk-grid-small mt20">
+            <?php if ($rich_content) : ?>
+                <section id="product-details" class="tk-product-section tk-product-details" data-product-section data-reveal aria-labelledby="product-details-title">
+                    <div class="tk-container">
+                        <header class="tk-product-details-header">
+                            <p><?php echo esc_html(tk_home_text('Thông tin chuyên sâu', 'In-depth information')); ?></p>
+                            <h2 id="product-details-title"><?php echo esc_html(tk_home_text('Mô tả chi tiết', 'Product details')); ?></h2>
+                        </header>
+                        <div class="tk-product-rich-content"><?php echo $rich_content; ?></div>
+                    </div>
+                </section>
+            <?php endif; ?>
 
-                                        <?php while ($camera->have_posts()) : $camera->the_post(); ?>
-                                            <?php include(TEMPLATEPATH . '/inc/1sanpham.php'); ?>
-                                        <?php endwhile; ?>
+            <section id="product-consultation" class="tk-product-consultation" data-product-section data-reveal aria-labelledby="product-consultation-title">
+                <div class="tk-container">
+                    <div class="tk-product-consultation-copy">
+                        <p><?php echo esc_html(tk_home_text('Đồng hành chuyên môn', 'Clinical partnership')); ?></p>
+                        <h2 id="product-consultation-title"><?php echo esc_html(tk_home_text('Cần một giải pháp phù hợp cho phòng khám của bạn?', 'Need the right solution for your practice?')); ?></h2>
+                        <span><?php echo esc_html(tk_home_text('Chia sẻ nhu cầu của bạn. Đội ngũ Tuấn Khang sẽ tư vấn sản phẩm, tài liệu và phương án hỗ trợ phù hợp.', 'Tell us what you need. Tuan Khang will recommend suitable products, documentation and support.')); ?></span>
+                    </div>
+                    <div class="tk-product-consultation-actions">
+                        <button
+                            type="button"
+                            class="tk-product-cta tk-product-cta-light"
+                            data-product-modal-open
+                            data-cta-source="final"
+                            data-tk-event="tk_product_cta_click"
+                            data-tk-action="consultation"
+                            data-tk-placement="final"
+                        >
+                            <span><?php echo esc_html(tk_home_text('Trao đổi với chuyên gia', 'Speak with an expert')); ?></span>
+                            <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 10h12m-4-4 4 4-4 4"/></svg>
+                        </button>
+                        <?php if ($hotline) : ?><a href="tel:<?php echo esc_attr($phone); ?>" data-tk-event="tk_product_cta_click" data-tk-action="hotline" data-tk-placement="final"><?php echo esc_html($hotline); ?></a><?php endif; ?>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </article>
 
-                                    </div>
-                                </div>
-                            </div><!-- panel-body -->
-                        <?php endif;
-                        wp_reset_query(); ?>
-                    <?php } ?>
-                    <?php wp_reset_query(); ?>
-                <?php } ?>
-
-            </section><!-- h-product -->
-
-        </div><!-- .page-body -->
-
-    </section>
-    <div class="form-dangky-popup js-form-dangky-popup">
-        <div class="form-inner">
-            <div class="form-dangky">
-                <?php echo do_shortcode("[contact-form-7 id='14' title='Form Đặt hàng' html_class='uk-form form dk-form']"); ?>
+    <?php if ($related_ids) : ?>
+        <section class="tk-product-related" aria-labelledby="related-products-title">
+            <div class="tk-container">
+                <header>
+                    <p><?php echo esc_html(tk_home_text('Tiếp tục khám phá', 'Continue exploring')); ?></p>
+                    <h2 id="related-products-title"><?php echo esc_html(tk_home_text('Sản phẩm liên quan', 'Related products')); ?></h2>
+                </header>
+                <div class="tk-product-related-grid">
+                    <?php foreach ($related_ids as $related_id) tk_product_card($related_id, false, 'h3'); ?>
+                </div>
             </div>
-            <span class="btn-close-popup js-btn-close-popup"><i class="fa fa-close"></i></span>
-        </div>
-    </div>
+        </section>
+    <?php endif; ?>
+</main>
 
-    <div class="list-btn-bot">
-        <div class="btn-tu-van text-center js-btn-tu-van">
-            <i class="fa fa-envelope"></i>
-            <span><?php esc_html_e("Đăng ký", "tuankhang"); ?></span>
+<?php if ($gallery) : ?>
+    <dialog class="tk-product-image-dialog" data-product-image-dialog aria-labelledby="product-image-dialog-title">
+        <div class="tk-product-image-dialog-inner">
+            <div class="tk-product-dialog-header">
+                <h2 id="product-image-dialog-title"><?php echo esc_html($title); ?></h2>
+                <button type="button" data-product-image-dialog-close aria-label="<?php echo esc_attr(tk_home_text('Đóng ảnh lớn', 'Close enlarged image')); ?>">
+                    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="tk-product-image-dialog-stage" data-product-image-dialog-stage></div>
         </div>
-        <!--    <div class="btn-hotline text-center">-->
-        <a class="smooth btn-hotline"
-           href="tel:<?php echo esc_attr(get_field('wpcf-so-hotline', 61)); ?>"
-           title="" rel="nofollow,noindex">
-            <i class="fa fa-phone"></i>
-            <span><?php esc_html_e("Hotline", "tuankhang"); ?></span>
+    </dialog>
+<?php endif; ?>
+
+<dialog class="tk-product-dialog" data-product-modal aria-labelledby="product-form-title">
+    <section data-product-modal-panel>
+        <div class="tk-product-dialog-header">
+            <div>
+                <p><?php echo esc_html(tk_home_text('Tư vấn sản phẩm', 'Product consultation')); ?></p>
+                <h2 id="product-form-title"><?php echo esc_html(tk_home_text('Trao đổi với chuyên gia Tuấn Khang', 'Speak with a Tuan Khang expert')); ?></h2>
+            </div>
+            <button type="button" data-product-modal-close aria-label="<?php echo esc_attr(tk_home_text('Đóng biểu mẫu', 'Close form')); ?>">
+                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <p class="tk-product-dialog-intro"><?php echo esc_html(tk_home_text('Để lại thông tin, đội ngũ của chúng tôi sẽ liên hệ và tư vấn theo nhu cầu thực tế của bạn.', 'Leave your details and our team will contact you with advice tailored to your needs.')); ?></p>
+        <div class="tk-product-form" data-product-form-host></div>
+        <template data-product-form-template>
+            <?php echo shortcode_exists('contact-form-7') ? do_shortcode('[contact-form-7 id="14"]') : '<p>' . esc_html(tk_home_text('Biểu mẫu hiện chưa khả dụng.', 'The form is currently unavailable.')) . '</p>'; ?>
+        </template>
+    </section>
+</dialog>
+
+<div
+    class="tk-product-mobile-bar"
+    aria-label="<?php echo esc_attr(tk_home_text('Liên hệ nhanh', 'Quick contact')); ?>"
+    data-product-mobile-bar
+>
+    <button
+        type="button"
+        data-product-modal-open
+        data-cta-source="mobile-sticky"
+        data-tk-event="tk_product_cta_click"
+        data-tk-action="consultation"
+        data-tk-placement="mobile-sticky"
+    >
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"/><path d="m22 6-10 7L2 6"/></svg>
+        <span><?php echo esc_html(tk_home_text('Tư vấn', 'Consult')); ?></span>
+    </button>
+    <?php if ($phone) : ?>
+        <a href="tel:<?php echo esc_attr($phone); ?>" rel="nofollow" data-tk-event="tk_product_cta_click" data-tk-action="hotline" data-tk-placement="mobile-sticky">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.69 2.8a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.33 1.85.56 2.81.69A2 2 0 0 1 22 16.92Z"/></svg>
+            <span><?php echo esc_html(tk_home_text('Hotline', 'Hotline')); ?></span>
         </a>
-        <!--    </div>-->
-
-    </div>
+    <?php endif; ?>
+</div>
 
 <?php get_footer(); ?>
