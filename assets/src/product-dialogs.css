@@ -26,7 +26,7 @@
 .tk-product-dialog > section { padding: 1.25rem; }
 .tk-product-dialog-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
 .tk-product-dialog-header > div > p { color: var(--tk-action); font-size: .68rem; font-weight: 750; letter-spacing: .14em; text-transform: uppercase; }
-.tk-product-dialog-header h2 { margin-top: .35rem; color: var(--tk-tech); font-family: "Source Serif 4", Georgia, serif; font-size: clamp(1.5rem, 4vw, 2.15rem); font-weight: 650; line-height: 1.15; text-wrap: balance; }
+.tk-product-dialog-header h2 { margin-top: .35rem; color: var(--tk-tech); font-family: var(--font-display, "TK Source Serif", Georgia, serif); font-size: clamp(1.5rem, 4vw, 2.15rem); font-weight: 650; line-height: 1.15; text-wrap: balance; }
 .tk-product-dialog-header > button {
   display: grid;
   width: 44px;
