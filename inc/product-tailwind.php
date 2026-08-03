@@ -302,20 +302,36 @@ function tk_product_premium_specs($post_id)
 {
     $items = array();
     $base = array(
-        tk_home_text('Model', 'Model') => get_post_meta($post_id, 'wpcf-model', true),
-        tk_home_text('Hãng sản xuất', 'Manufacturer') => get_post_meta($post_id, 'wpcf-hang-sx', true),
-        tk_home_text('Xuất xứ', 'Origin') => get_post_meta($post_id, 'wpcf-xuat-xu', true),
+        array(
+            'type' => 'model',
+            'label' => tk_home_text('Model', 'Model'),
+            'value' => get_post_meta($post_id, 'wpcf-model', true),
+        ),
+        array(
+            'type' => 'manufacturer',
+            'label' => tk_home_text('Hãng sản xuất', 'Manufacturer'),
+            'value' => get_post_meta($post_id, 'wpcf-hang-sx', true),
+        ),
+        array(
+            'type' => 'origin',
+            'label' => tk_home_text('Xuất xứ', 'Origin'),
+            'value' => get_post_meta($post_id, 'wpcf-xuat-xu', true),
+        ),
     );
-    foreach ($base as $label => $value) {
-        if (trim((string) $value) !== '') {
-            $items[] = array('label' => $label, 'value' => trim((string) $value));
+    foreach ($base as $spec) {
+        if (trim((string) $spec['value']) !== '') {
+            $items[] = array(
+                'type' => $spec['type'],
+                'label' => $spec['label'],
+                'value' => trim((string) $spec['value']),
+            );
         }
     }
     for ($index = 1; $index <= 8; $index++) {
         $label = trim((string) tk_product_premium_field('tk_product_spec_label_' . $index, $post_id));
         $value = trim((string) tk_product_premium_field('tk_product_spec_value_' . $index, $post_id));
         if ($label && $value) {
-            $items[] = array('label' => $label, 'value' => $value);
+            $items[] = array('type' => 'data', 'label' => $label, 'value' => $value);
         }
     }
     return $items;

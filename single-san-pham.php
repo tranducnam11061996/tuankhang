@@ -276,17 +276,78 @@ $section_nav[] = array('id' => 'product-consultation', 'label' => tk_home_text('
 
             <?php if ($specs) : ?>
                 <section id="product-specifications" class="tk-product-section tk-product-specifications" data-product-section data-reveal aria-labelledby="product-specifications-title">
-                    <div class="tk-container tk-product-section-grid">
-                        <div class="tk-product-section-heading">
-                            <span>03</span>
-                            <p><?php echo esc_html(tk_home_text('Dữ liệu sản phẩm', 'Product data')); ?></p>
-                            <h2 id="product-specifications-title"><?php echo esc_html(tk_home_text('Thông số & thông tin kỹ thuật', 'Specifications & technical information')); ?></h2>
+                    <div class="tk-container">
+                        <div class="tk-product-spec-console">
+                            <header class="tk-product-spec-intro">
+                                <div class="tk-product-spec-kicker">
+                                    <span aria-hidden="true">03</span>
+                                    <p><?php echo esc_html(tk_home_text('Dữ liệu sản phẩm', 'Product data')); ?></p>
+                                </div>
+                                <h2 id="product-specifications-title"><?php echo esc_html(tk_home_text('Thông số & thông tin kỹ thuật', 'Specifications & technical information')); ?></h2>
+                                <p class="tk-product-spec-description"><?php echo esc_html(tk_home_text('Thông tin nhận diện và nguồn gốc giúp bác sĩ lựa chọn giải pháp phù hợp với nhu cầu điều trị.', 'Identification and origin information helps clinicians select a solution suited to their treatment needs.')); ?></p>
+                                <svg class="tk-product-spec-line" aria-hidden="true" viewBox="0 0 280 72" fill="none">
+                                    <path d="M1 58h61l18-30 27 42 31-54 22 42h119" stroke="currentColor" stroke-width="1.5"/>
+                                    <circle cx="80" cy="28" r="4" fill="currentColor"/>
+                                    <circle cx="138" cy="16" r="4" fill="currentColor"/>
+                                    <circle cx="160" cy="58" r="4" fill="currentColor"/>
+                                </svg>
+                            </header>
+
+                            <div class="tk-product-spec-data">
+                                <dl class="tk-product-spec-list">
+                                    <?php foreach ($specs as $spec) : ?>
+                                        <div class="tk-product-spec-card">
+                                            <dt>
+                                                <span class="tk-product-spec-icon" aria-hidden="true">
+                                                    <?php if (($spec['type'] ?? '') === 'manufacturer') : ?>
+                                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 21V9l6 3V8l6 4V4h6v17Z"/><path d="M7 21v-4h3v4m4 0v-4h3v4"/></svg>
+                                                    <?php elseif (($spec['type'] ?? '') === 'origin') : ?>
+                                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.3 2.5 3.5 5.5 3.5 9S14.3 18.5 12 21c-2.3-2.5-3.5-5.5-3.5-9S9.7 5.5 12 3Z"/></svg>
+                                                    <?php elseif (($spec['type'] ?? '') === 'model') : ?>
+                                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 5h10l6 6-9 9-7-7Z"/><circle cx="9" cy="10" r="1.5"/></svg>
+                                                    <?php else : ?>
+                                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 4h14v16H5Z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>
+                                                    <?php endif; ?>
+                                                </span>
+                                                <span><?php echo esc_html($spec['label']); ?></span>
+                                            </dt>
+                                            <dd><?php echo esc_html($spec['value']); ?></dd>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </dl>
+
+                                <div class="tk-product-spec-footer">
+                                    <p><?php echo esc_html(tk_home_text('Cần thêm tài liệu để đánh giá sản phẩm?', 'Need more documentation to evaluate this product?')); ?></p>
+                                    <?php if ($catalogue) : ?>
+                                        <a
+                                            class="tk-product-spec-action"
+                                            href="<?php echo esc_url($catalogue['url']); ?>"
+                                            target="_blank"
+                                            rel="noopener"
+                                            data-tk-event="tk_product_catalogue_click"
+                                            data-tk-action="catalogue"
+                                            data-tk-placement="specifications"
+                                        >
+                                            <span><?php echo esc_html(tk_home_text('Xem catalogue kỹ thuật', 'View technical catalogue')); ?></span>
+                                            <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 10h12m-4-4 4 4-4 4"/></svg>
+                                        </a>
+                                    <?php else : ?>
+                                        <button
+                                            type="button"
+                                            class="tk-product-spec-action"
+                                            data-product-modal-open
+                                            data-cta-source="specifications"
+                                            data-tk-event="tk_product_cta_click"
+                                            data-tk-action="consultation"
+                                            data-tk-placement="specifications"
+                                        >
+                                            <span><?php echo esc_html(tk_home_text('Yêu cầu thông tin kỹ thuật', 'Request technical information')); ?></span>
+                                            <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 10h12m-4-4 4 4-4 4"/></svg>
+                                        </button>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
                         </div>
-                        <dl class="tk-product-spec-list">
-                            <?php foreach ($specs as $spec) : ?>
-                                <div><dt><?php echo esc_html($spec['label']); ?></dt><dd><?php echo esc_html($spec['value']); ?></dd></div>
-                            <?php endforeach; ?>
-                        </dl>
                     </div>
                 </section>
             <?php endif; ?>
