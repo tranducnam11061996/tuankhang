@@ -39,7 +39,7 @@ function tk_home_field($key, $default = '')
 
 function tk_home_language()
 {
-    return function_exists('wpm_get_language') ? (string) wpm_get_language() : 'vi';
+    return 'vi';
 }
 
 function tk_home_text($vi, $en)
@@ -208,6 +208,7 @@ function tk_home_slot_config($slot)
         'partner' => array('widths' => array(160, 320), 'sizes' => '160px', 'directory' => 'home'),
         'product-thumb' => array('widths' => array(160, 320), 'sizes' => '88px', 'directory' => 'products'),
         'product-card' => array('widths' => array(320, 480, 768), 'sizes' => '(min-width: 1024px) 220px, (min-width: 480px) 50vw, 100vw', 'directory' => 'products'),
+        'product-listing-hero' => array('widths' => array(480, 768, 1024), 'sizes' => '(min-width: 1024px) 38vw, calc(100vw - 32px)', 'directory' => 'products'),
         'product-detail' => array('widths' => array(480, 768, 1024), 'sizes' => '(min-width: 1024px) 460px, 100vw', 'directory' => 'products'),
         'product-gallery' => array('widths' => array(480, 768, 1024), 'sizes' => '(min-width: 1024px) 42vw, calc(100vw - 32px)', 'directory' => 'products'),
         'product-content' => array('widths' => array(480, 768, 1024), 'sizes' => '(min-width: 1024px) 760px, calc(100vw - 32px)', 'directory' => 'products'),

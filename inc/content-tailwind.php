@@ -46,7 +46,7 @@ function tk_site_banner($title, $breadcrumbs = array())
 
 function tk_site_preload_banner()
 {
-    if (is_front_page() || is_singular('san-pham') || is_admin()) return;
+    if (is_front_page() || is_singular('san-pham') || is_post_type_archive('san-pham') || is_tax('danh-muc') || (function_exists('tk_is_product_search') && tk_is_product_search()) || is_admin()) return;
     $fallback = get_theme_file_uri('/image/background-head-about.png');
     $srcset = array();
     foreach (array(480, 768, 1200, 1702) as $width) {
@@ -145,7 +145,7 @@ function tk_content_render_category_tree($nodes, $instance, $depth = 0)
     echo '<ul class="' . ($depth ? 'border-l border-slate-200 pl-3' : 'space-y-1') . '">';
     foreach ($nodes as $node) {
         $term = $node['term']; $active = in_array((int) $term->term_id, $active_ids, true); $panel_id = 'tk-context-' . sanitize_html_class($instance) . '-' . (int) $term->term_id;
-        echo '<li class="border-b border-slate-200 last:border-0"><div class="flex min-h-11 items-center gap-1"><a class="flex min-h-11 flex-1 items-center py-2 text-sm transition hover:text-accent ' . ($active ? 'font-bold text-primary' : 'text-slate-700') . '" href="' . esc_url(get_term_link($term)) . '">' . esc_html($term->name) . '</a>';
+        echo '<li class="border-b border-slate-200 last:border-0"><div class="flex min-h-11 items-center gap-1"><a class="flex min-h-11 flex-1 items-center py-2 text-sm transition hover:text-content-accent ' . ($active ? 'font-bold text-primary' : 'text-slate-700') . '" href="' . esc_url(get_term_link($term)) . '">' . esc_html($term->name) . '</a>';
         if ($node['children']) {
             $expanded = $active || $depth === 0;
             echo '<button type="button" data-context-toggle aria-expanded="' . ($expanded ? 'true' : 'false') . '" aria-controls="' . esc_attr($panel_id) . '" class="flex size-11 shrink-0 items-center justify-center text-primary" aria-label="' . esc_attr(tk_site_text('Mở chuyên mục con', 'Toggle subcategory')) . '"><svg class="size-4 transition-transform" aria-hidden="true" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg></button>';
@@ -188,12 +188,12 @@ function tk_content_sidebar($instance = 'desktop')
                 <?php if ($group === 'news') : ?>
                     <?php tk_content_render_category_tree(tk_content_category_tree(), $instance); ?>
                 <?php else : ?>
-                    <ul class="space-y-1"><?php foreach (tk_content_page_links($group) as $link) : ?><li class="border-b border-slate-200 last:border-0"><a class="flex min-h-11 items-center py-2 text-sm transition hover:text-accent <?php echo $link['active'] ? 'font-bold text-primary' : 'text-slate-700'; ?>" href="<?php echo esc_url($link['url']); ?>"><?php echo esc_html($link['label']); ?></a></li><?php endforeach; ?></ul>
+                    <ul class="space-y-1"><?php foreach (tk_content_page_links($group) as $link) : ?><li class="border-b border-slate-200 last:border-0"><a class="flex min-h-11 items-center py-2 text-sm transition hover:text-content-accent <?php echo $link['active'] ? 'font-bold text-primary' : 'text-slate-700'; ?>" href="<?php echo esc_url($link['url']); ?>"><?php echo esc_html($link['label']); ?></a></li><?php endforeach; ?></ul>
                 <?php endif; ?>
             </div>
         </section>
         <?php if ($group === 'contact') : ?>
-            <section class="mt-6 rounded-xl bg-slate-50 p-4" aria-labelledby="<?php echo esc_attr($instance); ?>-quick-contact-title"><h2 id="<?php echo esc_attr($instance); ?>-quick-contact-title" class="font-bold uppercase text-primary"><?php echo esc_html(tk_site_text('Liên hệ nhanh', 'Quick contact')); ?></h2><p class="mt-3"><a class="font-bold text-accent hover:underline" href="tel:<?php echo esc_attr(preg_replace('/[^0-9+]/', '', (string) tk_site_field('wpcf-so-hotline'))); ?>"><?php echo esc_html((string) tk_site_field('wpcf-so-hotline')); ?></a></p><p class="mt-2 break-all"><a class="text-primary hover:underline" href="mailto:<?php echo esc_attr((string) tk_site_field('wpcf-email')); ?>"><?php echo esc_html((string) tk_site_field('wpcf-email')); ?></a></p></section>
+            <section class="mt-6 rounded-xl bg-slate-50 p-4" aria-labelledby="<?php echo esc_attr($instance); ?>-quick-contact-title"><h2 id="<?php echo esc_attr($instance); ?>-quick-contact-title" class="font-bold uppercase text-primary"><?php echo esc_html(tk_site_text('Liên hệ nhanh', 'Quick contact')); ?></h2><p class="mt-3"><a class="font-bold text-content-accent hover:underline" href="tel:<?php echo esc_attr(preg_replace('/[^0-9+]/', '', (string) tk_site_field('wpcf-so-hotline'))); ?>"><?php echo esc_html((string) tk_site_field('wpcf-so-hotline')); ?></a></p><p class="mt-2 break-all"><a class="text-primary hover:underline" href="mailto:<?php echo esc_attr((string) tk_site_field('wpcf-email')); ?>"><?php echo esc_html((string) tk_site_field('wpcf-email')); ?></a></p></section>
         <?php else : ?>
             <section class="mt-6" aria-labelledby="<?php echo esc_attr($instance); ?>-recent-title"><h2 id="<?php echo esc_attr($instance); ?>-recent-title" class="bg-primary px-4 py-3 text-base font-bold uppercase text-white"><?php echo esc_html(tk_site_text('Bài viết mới', 'Recent posts')); ?></h2><div class="px-1"><?php foreach (tk_content_recent_post_ids() as $recent_id) tk_content_compact_post($recent_id); ?></div></section>
         <?php endif; ?>
@@ -226,10 +226,10 @@ function tk_content_post_card($post_id, $related = false, $priority = false)
         $image_args['fetchpriority'] = 'high';
     }
     if ($related) {
-        echo '<article class="tk-card group flex h-full flex-col"><a class="tk-card-image" href="' . esc_url($url) . '">' . ($thumb ? tk_picture($thumb, 'post-card', array('alt' => $title, 'class' => 'h-full w-full object-cover')) : '<span class="flex h-full items-center justify-center text-sm text-slate-600">No image</span>') . '</a><div class="flex flex-1 flex-col p-5"><h3 class="line-clamp-3 text-lg font-bold leading-6 text-primary"><a class="hover:text-accent" href="' . esc_url($url) . '">' . esc_html($title) . '</a></h3><p class="mt-3 line-clamp-3 text-sm text-slate-600">' . esc_html(wp_trim_words(get_the_excerpt($post_id), 24, '…')) . '</p></div></article>';
+        echo '<article class="tk-card group flex h-full flex-col"><a class="tk-card-image" href="' . esc_url($url) . '">' . ($thumb ? tk_picture($thumb, 'post-card', array('alt' => $title, 'class' => 'h-full w-full object-cover')) : '<span class="flex h-full items-center justify-center text-sm text-slate-600">No image</span>') . '</a><div class="flex flex-1 flex-col p-5"><h3 class="line-clamp-3 text-lg font-bold leading-6 text-primary"><a class="hover:text-content-accent" href="' . esc_url($url) . '">' . esc_html($title) . '</a></h3><p class="mt-3 line-clamp-3 text-sm text-slate-600">' . esc_html(wp_trim_words(get_the_excerpt($post_id), 24, '…')) . '</p></div></article>';
         return;
     }
-    echo '<article class="border-b border-slate-200 py-6 first:pt-0"><div class="grid gap-5 sm:grid-cols-[minmax(220px,40%)_1fr] sm:items-start"><a class="aspect-[16/10] overflow-hidden border border-slate-200 bg-slate-100" href="' . esc_url($url) . '">' . ($thumb ? tk_picture($thumb, 'post-card', $image_args) : '<span class="flex h-full items-center justify-center text-sm text-slate-600">No image</span>') . '</a><div><h2 class="text-lg font-bold uppercase leading-7 text-primary md:text-xl"><a class="hover:text-accent" href="' . esc_url($url) . '">' . esc_html($title) . '</a></h2><p class="mt-3 leading-7 text-slate-700">' . esc_html(wp_trim_words(get_the_excerpt($post_id), 50, '…')) . '</p><a class="mt-4 inline-flex min-h-11 items-center font-bold text-button hover:text-accent" href="' . esc_url($url) . '">' . esc_html(tk_site_text('Xem chi tiết', 'Read more')) . '<span class="ml-2" aria-hidden="true">→</span></a></div></div></article>';
+    echo '<article class="border-b border-slate-200 py-6 first:pt-0"><div class="grid gap-5 sm:grid-cols-[minmax(220px,40%)_1fr] sm:items-start"><a class="aspect-[16/10] overflow-hidden border border-slate-200 bg-slate-100" href="' . esc_url($url) . '">' . ($thumb ? tk_picture($thumb, 'post-card', $image_args) : '<span class="flex h-full items-center justify-center text-sm text-slate-600">No image</span>') . '</a><div><h2 class="text-lg font-bold uppercase leading-7 text-primary md:text-xl"><a class="hover:text-content-accent" href="' . esc_url($url) . '">' . esc_html($title) . '</a></h2><p class="mt-3 leading-7 text-slate-700">' . esc_html(wp_trim_words(get_the_excerpt($post_id), 50, '…')) . '</p><a class="mt-4 inline-flex min-h-11 items-center font-bold text-content-button hover:text-content-accent" href="' . esc_url($url) . '">' . esc_html(tk_site_text('Xem chi tiết', 'Read more')) . '<span class="ml-2" aria-hidden="true">→</span></a></div></div></article>';
 }
 
 function tk_content_pagination()

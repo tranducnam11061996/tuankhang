@@ -7,6 +7,59 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+function tk_product_allowed_sorts()
+{
+    return array('default', 'title_asc', 'title_desc', 'newest');
+}
+
+function tk_product_current_sort()
+{
+    $sort = get_query_var('tk_product_sort');
+    if (!$sort && isset($_GET['tk_product_sort']) && is_string($_GET['tk_product_sort'])) {
+        $sort = sanitize_key(wp_unslash($_GET['tk_product_sort']));
+    }
+    return in_array($sort, tk_product_allowed_sorts(), true) ? $sort : 'default';
+}
+
+function tk_product_register_query_vars($vars)
+{
+    $vars[] = 'tk_product_sort';
+    return $vars;
+}
+add_filter('query_vars', 'tk_product_register_query_vars');
+
+function tk_product_apply_listing_sort($query)
+{
+    if (is_admin() || !$query->is_main_query()) {
+        return;
+    }
+
+    $post_type = $query->get('post_type');
+    $is_product_search = $query->is_search() && (
+        $post_type === 'san-pham'
+        || (is_array($post_type) && in_array('san-pham', $post_type, true))
+    );
+    if (!$query->is_post_type_archive('san-pham') && !$query->is_tax('danh-muc') && !$is_product_search) {
+        return;
+    }
+
+    $query->set('posts_per_page', 12);
+
+    $sort = sanitize_key((string) $query->get('tk_product_sort'));
+    if (!in_array($sort, tk_product_allowed_sorts(), true)) {
+        $sort = 'default';
+        $query->set('tk_product_sort', $sort);
+    }
+    if ($sort === 'title_asc' || $sort === 'title_desc') {
+        $query->set('orderby', 'title');
+        $query->set('order', $sort === 'title_asc' ? 'ASC' : 'DESC');
+    } elseif ($sort === 'newest') {
+        $query->set('orderby', 'date');
+        $query->set('order', 'DESC');
+    }
+}
+add_action('pre_get_posts', 'tk_product_apply_listing_sort', 20);
+
 function tk_product_primary_term($post_id)
 {
     $terms = get_the_terms((int) $post_id, 'danh-muc');
@@ -44,6 +97,108 @@ function tk_product_current_term_ids()
         }
     }
     return array_values(array_unique(array_map('intval', $ids)));
+}
+
+function tk_product_current_term_id()
+{
+    $term = is_tax('danh-muc') ? get_queried_object() : null;
+    return $term instanceof WP_Term ? (int) $term->term_id : 0;
+}
+
+function tk_product_term_counts()
+{
+    static $counts = null;
+    if ($counts !== null) {
+        return $counts;
+    }
+    $counts = array();
+    $terms = get_terms(array(
+        'taxonomy' => 'danh-muc',
+        'hide_empty' => false,
+        'pad_counts' => true,
+    ));
+    if (!is_wp_error($terms)) {
+        foreach ($terms as $term) {
+            $counts[(int) $term->term_id] = (int) $term->count;
+        }
+    }
+    return $counts;
+}
+
+function tk_product_menu_term($item)
+{
+    $term_id = (int) get_post_meta($item->ID, '_menu_item_object_id', true);
+    $term = $term_id ? get_term($term_id, 'danh-muc') : null;
+    return $term instanceof WP_Term ? $term : null;
+}
+
+function tk_product_category_icon($slug)
+{
+    $slug = sanitize_title((string) $slug);
+    if (strpos($slug, 'implant') !== false) {
+        return '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M8.5 3.5c1.3 0 2.1.8 3.5.8s2.2-.8 3.5-.8c2.6 0 4 2.1 3.5 4.8-.8 4.2-2.2 11.8-4.5 11.8-1.5 0-1.2-4.7-2.5-4.7s-1 4.7-2.5 4.7C7.2 20.1 5.8 12.5 5 8.3c-.5-2.7.9-4.8 3.5-4.8Z"/><path d="M9.2 8.2h5.6M9.8 11h4.4"/></svg>';
+    }
+    if (strpos($slug, 'thiet-bi') !== false || strpos($slug, 'device') !== false) {
+        return '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4" y="5" width="16" height="12" rx="2"/><path d="M8 21h8M12 17v4M8 9h2l1.2 4 1.7-7 1.3 5H17"/></svg>';
+    }
+    if (strpos($slug, 'vat-lieu') !== false || strpos($slug, 'material') !== false) {
+        return '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="m12 3 8 4.5-8 4.5-8-4.5L12 3Z"/><path d="m4 12 8 4.5 8-4.5M4 16.5 12 21l8-4.5"/></svg>';
+    }
+    if (strpos($slug, 'den') !== false || strpos($slug, 'light') !== false) {
+        return '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 15h6M10 19h4M8.3 13.2a6 6 0 1 1 7.4 0c-.8.6-1.2 1.1-1.3 1.8H9.6c-.1-.7-.5-1.2-1.3-1.8Z"/><path d="M12 1v2M3.5 4.5 5 6M21 4.5 19 6"/></svg>';
+    }
+    return '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg>';
+}
+
+function tk_product_listing_base_url()
+{
+    if (is_tax('danh-muc')) {
+        $term = get_queried_object();
+        if ($term instanceof WP_Term) {
+            $url = get_term_link($term);
+            if (!is_wp_error($url)) {
+                return $url;
+            }
+        }
+    }
+    return get_post_type_archive_link('san-pham') ?: home_url('/san-pham/');
+}
+
+function tk_product_listing_context()
+{
+    global $wp_query;
+    $found = isset($wp_query->found_posts) ? (int) $wp_query->found_posts : 0;
+    $hero_product_id = !empty($wp_query->posts[0]) ? (int) $wp_query->posts[0]->ID : 0;
+    $context = array(
+        'eyebrow' => tk_home_text('Danh mục sản phẩm', 'Product catalogue'),
+        'title' => tk_home_text('Giải pháp nha khoa cho thực hành hiện đại', 'Dental solutions for modern practice'),
+        'description' => tk_home_text(
+            'Khám phá hệ sinh thái Implant, thiết bị và vật liệu nha khoa được Tuấn Khang lựa chọn để hỗ trợ nhu cầu lâm sàng và vận hành.',
+            'Explore an ecosystem of implants, equipment and dental materials selected by Tuan Khang for clinical and operational needs.'
+        ),
+        'found' => $found,
+        'hero_product_id' => $hero_product_id,
+    );
+    if (is_tax('danh-muc')) {
+        $term = get_queried_object();
+        if ($term instanceof WP_Term) {
+            $context['title'] = $term->name;
+            $description = trim(wp_strip_all_tags(term_description($term)));
+            $context['description'] = $description ?: sprintf(
+                tk_home_text('Khám phá các giải pháp %s được tuyển chọn cho nhu cầu chuyên môn nha khoa.', 'Explore selected %s solutions for professional dental needs.'),
+                $term->name
+            );
+        }
+    } elseif (is_search()) {
+        $query = get_search_query();
+        $context['eyebrow'] = tk_home_text('Tìm kiếm sản phẩm', 'Product search');
+        $context['title'] = sprintf(tk_home_text('Kết quả cho “%s”', 'Results for “%s”'), $query);
+        $context['description'] = sprintf(
+            tk_home_text('Tìm thấy %s sản phẩm phù hợp với từ khóa của bạn.', 'Found %s products matching your keyword.'),
+            number_format_i18n($found)
+        );
+    }
+    return $context;
 }
 
 function tk_product_listing_title()
@@ -116,22 +271,43 @@ function tk_product_category_tree($nodes, $instance = 'desktop', $depth = 0)
         return;
     }
     $active_ids = tk_product_current_term_ids();
-    echo '<ul class="' . ($depth ? 'border-l border-slate-200 pl-3' : 'space-y-1') . '">';
-    foreach ($nodes as $node) {
+    $exact_id = tk_product_current_term_id();
+    $counts = tk_product_term_counts();
+    $has_active_root = $depth === 0 && !empty(array_intersect($active_ids, array_map(static function ($node) {
+        return (int) get_post_meta($node['item']->ID, '_menu_item_object_id', true);
+    }, $nodes)));
+    echo '<ul class="' . ($depth ? 'tk-catalog-subcategory-list' : 'tk-catalog-category-list') . '"' . ($depth ? '' : ' data-category-tree') . '>';
+    foreach ($nodes as $index => $node) {
         $item = $node['item'];
-        $term_id = (int) get_post_meta($item->ID, '_menu_item_object_id', true);
-        $active = in_array($term_id, $active_ids, true);
+        $term = tk_product_menu_term($item);
+        $term_id = $term instanceof WP_Term ? (int) $term->term_id : 0;
+        $active_path = $term_id && in_array($term_id, $active_ids, true);
+        $is_current = $term_id && $term_id === $exact_id;
         $panel_id = 'tk-category-' . sanitize_html_class($instance) . '-' . (int) $item->ID;
-        echo '<li class="border-b border-slate-200 last:border-0">';
-        echo '<div class="flex min-h-11 items-center gap-1">';
-        echo '<a class="flex min-h-11 flex-1 items-center py-2 text-sm transition hover:text-accent ' . ($active ? 'font-bold text-primary' : 'text-slate-700') . '" href="' . esc_url($item->url) . '">' . esc_html($item->title) . '</a>';
+        if ($depth > 0) {
+            echo '<li><a class="tk-catalog-subcategory-link' . ($is_current ? ' is-current' : '') . '" href="' . esc_url($item->url) . '"' . ($is_current ? ' aria-current="page"' : '') . '><span>' . esc_html($item->title) . '</span><small>' . esc_html(number_format_i18n($counts[$term_id] ?? 0)) . '</small></a>';
+            if ($node['children']) {
+                tk_product_category_tree($node['children'], $instance, $depth + 1);
+            }
+            echo '</li>';
+            continue;
+        }
+
+        $expanded = !empty($node['children']) && ($active_path || (!$has_active_root && $index === 0));
+        $slug = $term instanceof WP_Term ? $term->slug : sanitize_title($item->title);
+        echo '<li class="tk-catalog-category' . ($active_path ? ' is-active-path' : '') . ($is_current ? ' is-current' : '') . '">';
+        echo '<div class="tk-catalog-category-row">';
+        echo '<a class="tk-catalog-category-link" href="' . esc_url($item->url) . '"' . ($is_current ? ' aria-current="page"' : '') . '>';
+        echo '<span class="tk-catalog-category-index">' . esc_html(str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT)) . '</span>';
+        echo '<span class="tk-catalog-category-icon">' . tk_product_category_icon($slug) . '</span>';
+        echo '<span class="tk-catalog-category-copy"><strong>' . esc_html($item->title) . '</strong><small>' . sprintf(esc_html(tk_home_text('%s sản phẩm', '%s products')), esc_html(number_format_i18n($counts[$term_id] ?? 0))) . '</small></span>';
+        echo '</a>';
         if ($node['children']) {
-            $expanded = $active || $depth === 0;
-            echo '<button type="button" data-category-toggle aria-expanded="' . ($expanded ? 'true' : 'false') . '" aria-controls="' . esc_attr($panel_id) . '" class="flex size-11 shrink-0 items-center justify-center text-primary" aria-label="' . esc_attr(tk_home_text('Mở danh mục con', 'Toggle subcategory')) . '"><svg class="size-4 transition-transform" aria-hidden="true" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg></button>';
+            echo '<button type="button" data-category-toggle aria-expanded="' . ($expanded ? 'true' : 'false') . '" aria-controls="' . esc_attr($panel_id) . '" class="tk-catalog-category-toggle" aria-label="' . esc_attr(sprintf(tk_home_text('Mở hoặc đóng danh mục %s', 'Toggle %s category'), $item->title)) . '"><svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m6 8 4 4 4-4"/></svg></button>';
         }
         echo '</div>';
         if ($node['children']) {
-            echo '<div id="' . esc_attr($panel_id) . '"' . ($expanded ? '' : ' hidden') . ' class="pb-2">';
+            echo '<div id="' . esc_attr($panel_id) . '" class="tk-catalog-category-panel"' . ($expanded ? '' : ' hidden') . '>';
             tk_product_category_tree($node['children'], $instance, $depth + 1);
             echo '</div>';
         }
@@ -149,16 +325,93 @@ function tk_product_featured_ids()
     $query = new WP_Query(array(
         'post_type' => 'san-pham',
         'post_status' => 'publish',
-        'posts_per_page' => 6,
+        'posts_per_page' => -1,
         'meta_key' => 'wpcf-noi-bat',
         'meta_value' => '1',
+        'orderby' => array('date' => 'DESC', 'ID' => 'DESC'),
         'fields' => 'ids',
         'no_found_rows' => true,
         'ignore_sticky_posts' => true,
     ));
     $ids = array_map('intval', $query->posts);
+    $positions = array_flip($ids);
+    $orders = array();
+    foreach ($ids as $featured_id) {
+        $orders[$featured_id] = tk_product_normalize_featured_order(get_post_meta($featured_id, '_tk_featured_order', true));
+    }
+    usort($ids, static function ($left_id, $right_id) use ($orders, $positions) {
+        $left_order = $orders[$left_id] ?? 0;
+        $right_order = $orders[$right_id] ?? 0;
+        if ($left_order && $right_order && $left_order !== $right_order) {
+            return $left_order <=> $right_order;
+        }
+        if ($left_order !== $right_order) {
+            return $left_order ? -1 : 1;
+        }
+        return ($positions[$left_id] ?? 0) <=> ($positions[$right_id] ?? 0);
+    });
+    $ids = array_slice($ids, 0, 8);
     return $ids;
 }
+
+function tk_product_normalize_featured_order($value)
+{
+    if (is_array($value)) {
+        return 0;
+    }
+    $value = trim((string) $value);
+    if ($value === '' || !ctype_digit($value)) {
+        return 0;
+    }
+    $order = (int) $value;
+    return $order >= 1 && $order <= 999 ? $order : 0;
+}
+
+function tk_product_register_featured_order_meta_box()
+{
+    add_meta_box(
+        'tk-product-featured-order',
+        'Thứ tự nổi bật',
+        'tk_product_render_featured_order_meta_box',
+        'san-pham',
+        'side',
+        'default'
+    );
+}
+add_action('add_meta_boxes_san-pham', 'tk_product_register_featured_order_meta_box');
+
+function tk_product_render_featured_order_meta_box($post)
+{
+    $order = tk_product_normalize_featured_order(get_post_meta($post->ID, '_tk_featured_order', true));
+    wp_nonce_field('tk_product_featured_order', 'tk_product_featured_order_nonce');
+    ?>
+    <p><label for="tk-featured-order"><strong>Vị trí hiển thị</strong></label></p>
+    <input id="tk-featured-order" name="tk_featured_order" type="number" min="1" max="999" step="1" value="<?php echo $order ? esc_attr((string) $order) : ''; ?>" class="widefat" inputmode="numeric">
+    <p class="description">Số nhỏ hiển thị trước. Để trống nếu chưa cần ưu tiên. Chỉ áp dụng khi sản phẩm được đánh dấu nổi bật.</p>
+    <?php
+}
+
+function tk_product_save_featured_order($post_id)
+{
+    if (get_post_type($post_id) !== 'san-pham'
+        || (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE)
+        || wp_is_post_autosave($post_id)
+        || wp_is_post_revision($post_id)
+        || !current_user_can('edit_post', $post_id)
+        || !isset($_POST['tk_product_featured_order_nonce'])
+        || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['tk_product_featured_order_nonce'])), 'tk_product_featured_order')) {
+        return;
+    }
+
+    $value = isset($_POST['tk_featured_order']) ? wp_unslash($_POST['tk_featured_order']) : '';
+    $order = tk_product_normalize_featured_order($value);
+    if ($order) {
+        update_post_meta($post_id, '_tk_featured_order', $order);
+    } else {
+        delete_post_meta($post_id, '_tk_featured_order');
+    }
+}
+add_action('save_post_san-pham', 'tk_product_save_featured_order');
 
 function tk_product_card($post_id, $compact = false, $heading_level = 'h2')
 {
@@ -170,7 +423,7 @@ function tk_product_card($post_id, $compact = false, $heading_level = 'h2')
         echo '<article class="border-b border-slate-200 py-3 last:border-0"><a class="group grid grid-cols-[88px_1fr] items-center gap-3" href="' . esc_url($url) . '">';
         echo '<span class="aspect-square overflow-hidden rounded-lg border border-slate-200 bg-white">';
         echo $thumbnail_id ? tk_picture($thumbnail_id, 'product-thumb', array('alt' => $title, 'class' => 'h-full w-full object-contain p-1')) : '<span class="flex h-full items-center justify-center text-xs text-slate-400">No image</span>';
-        echo '</span><span><span class="line-clamp-2 font-semibold leading-5 text-slate-800 transition group-hover:text-primary">' . esc_html($title) . '</span><span class="mt-1 block text-xs text-slate-500">' . esc_html(tk_home_text('Đánh giá', 'Rating')) . '</span><span class="block tracking-wider text-amber-400" aria-label="5/5">★★★★★</span></span></a></article>';
+        echo '</span><span><span class="line-clamp-2 font-semibold leading-5 text-slate-800 transition group-hover:text-primary">' . esc_html($title) . '</span><span class="mt-1 block text-xs font-semibold uppercase tracking-wider text-slate-500">' . esc_html(tk_home_text('Xem sản phẩm', 'View product')) . '</span></span></a></article>';
         return;
     }
 
@@ -181,20 +434,88 @@ function tk_product_card($post_id, $compact = false, $heading_level = 'h2')
     echo '</a><' . $heading_level . ' class="mt-3 text-center text-base font-bold leading-6 text-slate-800"><a class="transition hover:text-primary" href="' . esc_url($url) . '">' . esc_html($title) . '</a></' . $heading_level . '></article>';
 }
 
+function tk_product_listing_card($post_id, $variant = 'catalog', $display_index = 0)
+{
+    $post_id = (int) $post_id;
+    $title = get_the_title($post_id);
+    $url = get_permalink($post_id);
+    $thumbnail_id = get_post_thumbnail_id($post_id);
+    $term = tk_product_primary_term($post_id);
+    $manufacturer = trim((string) get_post_meta($post_id, 'wpcf-hang-sx', true));
+    $origin = trim((string) get_post_meta($post_id, 'wpcf-xuat-xu', true));
+    $facts = array_values(array_unique(array_filter(array($manufacturer, $origin))));
+    $variant = $variant === 'featured' ? 'featured' : 'catalog';
+    $display_index = max(0, (int) $display_index);
+    $card_number = $variant === 'featured' && $display_index
+        ? $display_index
+        : $post_id % 100;
+    ?>
+    <article class="tk-catalog-card tk-catalog-card--<?php echo esc_attr($variant); ?>"<?php echo $variant === 'catalog' ? ' data-reveal' : ''; ?>>
+        <a href="<?php echo esc_url($url); ?>">
+            <span class="tk-catalog-card-stage">
+                <?php if ($thumbnail_id) : ?>
+                    <?php echo tk_picture($thumbnail_id, 'product-card', array('alt' => $title, 'class' => 'tk-catalog-card-image')); ?>
+                <?php else : ?>
+                    <span class="tk-catalog-card-placeholder" aria-hidden="true"><?php echo tk_product_category_icon(''); ?></span>
+                <?php endif; ?>
+                <span class="tk-catalog-card-number" aria-hidden="true"><?php echo esc_html(str_pad((string) $card_number, 2, '0', STR_PAD_LEFT)); ?></span>
+            </span>
+            <span class="tk-catalog-card-body">
+                <span class="tk-catalog-card-eyebrow"><?php echo esc_html($term instanceof WP_Term ? $term->name : tk_home_text('Thiết bị nha khoa', 'Dental solution')); ?></span>
+                <h3><?php echo esc_html($title); ?></h3>
+                <?php if ($facts) : ?><span class="tk-catalog-card-meta"><?php echo esc_html(implode(' · ', $facts)); ?></span><?php endif; ?>
+                <span class="tk-catalog-card-cta"><span class="tk-catalog-card-cta-label"><?php echo esc_html(tk_home_text('Khám phá sản phẩm', 'Explore product')); ?></span><svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 10h12M11 5l5 5-5 5"/></svg></span>
+            </span>
+        </a>
+    </article>
+    <?php
+}
+
 function tk_product_sidebar($instance = 'desktop')
 {
     $menu = tk_home_menu_tree(24);
     ?>
-    <div>
+    <div class="tk-catalog-console">
+        <div class="tk-catalog-console-head">
+            <span><?php echo esc_html(tk_home_text('Catalog / 2026', 'Catalogue / 2026')); ?></span>
+            <span class="tk-catalog-console-status"><i></i><?php echo esc_html(tk_home_text('Trực tuyến', 'Online')); ?></span>
+        </div>
         <section aria-labelledby="<?php echo esc_attr($instance); ?>-category-title">
-            <h2 id="<?php echo esc_attr($instance); ?>-category-title" class="bg-primary px-4 py-3 text-base font-bold uppercase text-white"><?php echo esc_html(tk_home_text('Danh mục sản phẩm', 'Product categories')); ?></h2>
-            <div class="bg-slate-50 px-4 py-2"><?php tk_product_category_tree($menu, $instance); ?></div>
+            <p class="tk-catalog-kicker"><?php echo esc_html(tk_home_text('Điều hướng chuyên môn', 'Professional navigation')); ?></p>
+            <h2 id="<?php echo esc_attr($instance); ?>-category-title"><?php echo esc_html(tk_home_text('Danh mục sản phẩm', 'Product categories')); ?></h2>
+            <?php tk_product_category_tree($menu, $instance); ?>
         </section>
-        <section class="mt-6" aria-labelledby="<?php echo esc_attr($instance); ?>-featured-title">
-            <h2 id="<?php echo esc_attr($instance); ?>-featured-title" class="bg-primary px-4 py-3 text-base font-bold uppercase text-white"><?php echo esc_html(tk_home_text('Sản phẩm nổi bật', 'Featured products')); ?></h2>
-            <div class="px-1"><?php foreach (tk_product_featured_ids() as $featured_id) tk_product_card($featured_id, true); ?></div>
-        </section>
+        <a class="tk-catalog-all-link" href="<?php echo esc_url(get_post_type_archive_link('san-pham')); ?>">
+            <span><?php echo esc_html(tk_home_text('Xem toàn bộ catalog', 'View full catalogue')); ?></span>
+            <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 10h12M11 5l5 5-5 5"/></svg>
+        </a>
+        <div class="tk-catalog-consult">
+            <span class="tk-catalog-consult-icon" aria-hidden="true">TK</span>
+            <div><strong><?php echo esc_html(tk_home_text('Cần tư vấn cấu hình?', 'Need configuration advice?')); ?></strong><p><?php echo esc_html(tk_home_text('Đội ngũ chuyên môn sẵn sàng hỗ trợ.', 'Our specialists are ready to help.')); ?></p></div>
+            <a href="<?php echo esc_url(home_url('/lien-he/')); ?>" aria-label="<?php echo esc_attr(tk_home_text('Liên hệ tư vấn', 'Contact for advice')); ?>"><svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 10h12M11 5l5 5-5 5"/></svg></a>
+        </div>
     </div>
+    <?php
+}
+
+function tk_product_featured_strip()
+{
+    $ids = tk_product_featured_ids();
+    if (!$ids) {
+        return;
+    }
+    ?>
+    <section class="tk-catalog-featured" aria-labelledby="tk-catalog-featured-title">
+        <div class="tk-container">
+            <div class="tk-catalog-featured-head">
+                <div><p><?php echo esc_html(tk_home_text('Tuyển chọn bởi Tuấn Khang', 'Selected by Tuan Khang')); ?></p><h2 id="tk-catalog-featured-title"><?php echo esc_html(tk_home_text('Thiết bị nổi bật cho thực hành hiện đại', 'Featured equipment for modern practice')); ?></h2></div>
+                <span><?php echo esc_html(sprintf(tk_home_text('%s giải pháp', '%s solutions'), str_pad((string) count($ids), 2, '0', STR_PAD_LEFT))); ?></span>
+            </div>
+            <div class="tk-catalog-featured-grid">
+                <?php foreach ($ids as $index => $featured_id) tk_product_listing_card($featured_id, 'featured', $index + 1); ?>
+            </div>
+        </div>
+    </section>
     <?php
 }
 
@@ -210,11 +531,16 @@ function tk_product_pagination()
         'type' => 'array',
         'prev_text' => tk_home_text('Trước', 'Previous'),
         'next_text' => tk_home_text('Sau', 'Next'),
+        'add_args' => array_filter(array(
+            's' => get_search_query(),
+            'post_type' => is_search() ? 'san-pham' : '',
+            'tk_product_sort' => tk_product_current_sort() !== 'default' ? tk_product_current_sort() : '',
+        )),
     ));
     if (!$links) {
         return;
     }
-    echo '<nav class="mt-10" aria-label="' . esc_attr(tk_home_text('Phân trang sản phẩm', 'Product pagination')) . '"><ul class="flex flex-wrap items-center justify-center gap-2">';
+    echo '<nav class="tk-catalog-pagination" aria-label="' . esc_attr(tk_home_text('Phân trang sản phẩm', 'Product pagination')) . '"><ul>';
     foreach ($links as $link) {
         echo '<li class="tk-page-link">' . wp_kses_post($link) . '</li>';
     }
@@ -480,11 +806,18 @@ function tk_product_normalize_rich_content($post_id)
 
 function tk_product_preload_hero()
 {
-    if (!is_singular('san-pham')) {
+    $sizes = '(min-width: 1024px) 42vw, calc(100vw - 32px)';
+    if (is_singular('san-pham')) {
+        $gallery = tk_product_gallery_items(get_queried_object_id());
+        $image = $gallery[0] ?? array();
+    } elseif (is_post_type_archive('san-pham') || is_tax('danh-muc') || (function_exists('tk_is_product_search') && tk_is_product_search())) {
+        global $wp_query;
+        $first_post_id = !empty($wp_query->posts[0]) ? (int) $wp_query->posts[0]->ID : 0;
+        $image = tk_home_image_data($first_post_id ? get_post_thumbnail_id($first_post_id) : 0);
+        $sizes = '(min-width: 1024px) 38vw, calc(100vw - 32px)';
+    } else {
         return;
     }
-    $gallery = tk_product_gallery_items(get_queried_object_id());
-    $image = $gallery[0] ?? array();
     if (empty($image['url'])) {
         return;
     }
@@ -497,7 +830,7 @@ function tk_product_preload_hero()
     }
     echo '<link rel="preload" as="image" href="' . esc_url($image['url']) . '"';
     if ($srcset) {
-        echo ' imagesrcset="' . esc_attr(implode(', ', $srcset)) . '" imagesizes="(min-width: 1024px) 42vw, calc(100vw - 32px)" type="image/avif"';
+        echo ' imagesrcset="' . esc_attr(implode(', ', $srcset)) . '" imagesizes="' . esc_attr($sizes) . '" type="image/avif"';
     }
     echo ' fetchpriority="high">' . "\n";
 }

@@ -11,14 +11,19 @@
 @source "../../inc/content-tailwind.php";
 
 @theme {
-  --color-primary: #013974;
-  --color-button: #104099;
-  --color-accent: #d80f19;
-  --color-footer: #002d5c;
-  --color-footer-deep: #001c3a;
-  --font-sans: Arial, Helvetica, sans-serif;
+  /* The shared site bundle owns typography; do not emit Tailwind's default stack here. */
+  --font-sans: initial;
+  --color-content-button: #104099;
+  --color-content-accent: #d80f19;
+}
+
+/* Content-specific styling must not override the shared header/footer tokens. */
+.tk-content-context {
+  --color-content-button: #104099;
+  --color-content-accent: #d80f19;
   --radius-card: 15px;
   --shadow-card: 0 8px 24px rgb(1 57 116 / 10%);
+  font-family: var(--font-sans);
 }
 
 .tk-context-filter-drawer { transform: translateX(-100%); transition: transform .25s ease; }
@@ -75,6 +80,38 @@ body.tk-context-filter-open .tk-context-filter-overlay { opacity: 1; visibility:
 .tk-content .alignright { float: right; margin: .35rem 0 1rem 1.25rem; }
 .tk-content::after { content: ""; display: table; clear: both; }
 .tk-content-image { width: auto; max-width: 100%; height: auto; }
+
+@media (min-width: 1024px) {
+  .tk-content > figure.wp-caption.aligncenter {
+    min-width: 60%;
+    max-width: 100%;
+    margin-inline: auto;
+  }
+
+  .tk-content > figure.wp-caption.aligncenter > picture {
+    display: block;
+    width: 100%;
+  }
+
+  .tk-content > figure.wp-caption.aligncenter > img,
+  .tk-content > figure.wp-caption.aligncenter > picture > img {
+    width: 100%;
+    height: auto;
+  }
+
+  .tk-content > p > picture:only-child {
+    display: block;
+    width: 100%;
+  }
+
+  .tk-content > p > img.aligncenter[class*="wp-image-"]:only-child,
+  .tk-content > p > picture:only-child > img.tk-content-image {
+    min-width: 60%;
+    max-width: 100%;
+    height: auto;
+    margin-inline: auto;
+  }
+}
 
 @media (max-width: 639px) {
   .tk-content { font-size: .95rem; line-height: 1.7; }

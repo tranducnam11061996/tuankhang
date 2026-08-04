@@ -35,15 +35,6 @@ $consultation_url = home_url('/lien-he/');
             <?php endif; ?>
         </div>
         <div class="flex items-center gap-1">
-            <?php if (function_exists('wpm_language_switcher')) : ?>
-                <div data-dropdown data-open="false" class="relative">
-                    <button type="button" data-dropdown-trigger aria-expanded="false" class="tk-topbar-control">
-                        <svg class="size-4" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 010 20M12 2a15 15 0 000 20"/></svg>
-                        <?php echo esc_html(tk_site_text('Ngôn ngữ', 'Language')); ?>
-                    </button>
-                    <div class="tk-dropdown-panel tk-language-list min-w-40 text-slate-700"><?php wpm_language_switcher('list', 'name'); ?></div>
-                </div>
-            <?php endif; ?>
             <div data-dropdown data-open="false" class="relative">
                 <button type="button" data-dropdown-trigger aria-expanded="false" class="tk-topbar-control">
                     <svg class="size-4" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
@@ -62,7 +53,7 @@ $consultation_url = home_url('/lien-he/');
             <img src="<?php echo esc_url(tk_site_logo()); ?>" width="200" height="139" class="h-16 w-auto xl:h-[68px]" alt="<?php echo esc_attr($company_name); ?>">
         </a>
         <nav aria-label="<?php echo esc_attr(tk_site_text('Điều hướng chính', 'Primary navigation')); ?>" class="ml-auto min-w-0"><?php tk_site_desktop_menu($site_menu); ?></nav>
-        <a class="tk-header-consultation" href="<?php echo esc_url($consultation_url); ?>">
+        <a class="tk-header-consultation" href="<?php echo esc_url($consultation_url); ?>" aria-label="<?php echo esc_attr(tk_site_text('Nhận tư vấn', 'Get consultation')); ?>">
             <svg class="size-5 shrink-0" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/><path d="M8 9h8M8 13h5"/></svg>
             <span class="hidden 2xl:inline"><?php echo esc_html(tk_site_text('Nhận tư vấn', 'Get consultation')); ?></span>
         </a>
@@ -88,5 +79,4 @@ $consultation_url = home_url('/lien-he/');
     <div class="mb-5"><?php get_search_form(array('aria_label' => tk_site_text('Tìm kiếm sản phẩm', 'Search products'))); ?></div>
     <nav aria-label="<?php echo esc_attr(tk_site_text('Menu di động', 'Mobile navigation')); ?>"><?php tk_site_mobile_menu($site_menu); ?></nav>
     <a class="tk-cta tk-cta-primary mt-6 w-full" href="<?php echo esc_url($consultation_url); ?>"><span><?php echo esc_html(tk_site_text('Nhận tư vấn chuyên môn', 'Get expert consultation')); ?></span><svg class="tk-cta-arrow size-4" aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 10h12M11 5l5 5-5 5"/></svg></a>
-    <?php if (function_exists('wpm_language_switcher')) : ?><div class="tk-language-list mt-6 border-t border-line pt-4"><?php wpm_language_switcher('list', 'name'); ?></div><?php endif; ?>
 </aside>

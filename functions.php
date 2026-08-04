@@ -59,6 +59,8 @@ require_once get_theme_file_path('/inc/home-tailwind.php');
 require_once get_theme_file_path('/inc/home-components.php');
 require_once get_theme_file_path('/inc/content-tailwind.php');
 require_once get_theme_file_path('/inc/product-tailwind.php');
+require_once get_theme_file_path('/inc/seo-tailwind.php');
+require_once get_theme_file_path('/inc/performance-tailwind.php');
 
 function tk_is_product_search()
 {
@@ -130,7 +132,7 @@ function tuankhang_preload_interface_fonts()
         return;
     }
 
-    $language = function_exists('wpm_get_language') ? (string) wpm_get_language() : 'vi';
+    $language = tk_home_language();
     $files = array('manrope-latin.woff2', 'source-serif-4-latin.woff2');
     if ($language !== 'en') {
         array_unshift($files, 'manrope-vietnamese.woff2', 'source-serif-4-vietnamese.woff2');
@@ -151,8 +153,8 @@ function tuankhang_prune_tailwind_assets()
         return;
     }
 
-    $style_handles = array('contact-form-7', 'wp-pagenavi', 'wpm-main');
-    $script_handles = array('jquery', 'jquery-core', 'jquery-migrate', 'wpm-switcher-block-script');
+    $style_handles = array('contact-form-7', 'wp-pagenavi');
+    $script_handles = array('jquery', 'jquery-core', 'jquery-migrate');
     if (!is_singular('san-pham')) {
         $script_handles = array_merge($script_handles, array('contact-form-7', 'wpcf7-recaptcha'));
     }

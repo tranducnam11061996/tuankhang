@@ -4,7 +4,7 @@ $title = tk_site_text('Tin tức', 'News');
 tk_site_banner($title, tk_content_breadcrumbs());
 tk_content_sidebar_drawer();
 ?>
-<main id="main-content" class="py-10 md:py-14">
+<main id="main-content" class="tk-content-context py-10 md:py-14">
     <div class="tk-container">
         <?php tk_content_sidebar_button(); ?>
         <div class="grid gap-8 lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-10">

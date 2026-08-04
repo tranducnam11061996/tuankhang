@@ -4,12 +4,14 @@
   const focusableSelector = 'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
   const productPage = document.querySelector('[data-product-detail]');
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const catalogPage = document.querySelector('[data-product-catalog]');
   const productContext = productPage ? {
     product_id: Number(productPage.dataset.productId || 0),
     product_slug: productPage.dataset.productSlug || '',
     product_taxonomy: productPage.dataset.productTaxonomy || '',
   } : {};
   if (productPage && !reducedMotion.matches) productPage.classList.add('has-product-reveal');
+  if (catalogPage && !reducedMotion.matches) catalogPage.classList.add('has-catalog-reveal');
   let dialogStylesPromise = null;
   const ensureDialogStyles = () => {
     const source = productPage?.dataset.productDialogStyle;
@@ -26,17 +28,6 @@
     });
     return dialogStylesPromise;
   };
-
-  const setHeaderHeight = () => {
-    const header = document.querySelector('[data-site-header]');
-    if (!header) return;
-    document.documentElement.style.setProperty('--tk-site-header-height', `${Math.round(header.getBoundingClientRect().height)}px`);
-  };
-  setHeaderHeight();
-  if ('ResizeObserver' in window) {
-    const header = document.querySelector('[data-site-header]');
-    if (header) new ResizeObserver(setHeaderHeight).observe(header);
-  }
 
   const productHero = document.querySelector('[data-product-hero]');
   const mobileBar = document.querySelector('[data-product-mobile-bar]');
@@ -209,13 +200,23 @@
     });
   });
 
-  document.querySelectorAll('[data-category-toggle]').forEach((button) => {
-    button.addEventListener('click', () => {
-      const expanded = button.getAttribute('aria-expanded') === 'true';
-      const panel = document.getElementById(button.getAttribute('aria-controls'));
-      button.setAttribute('aria-expanded', String(!expanded));
-      if (panel) panel.hidden = expanded;
+  document.querySelectorAll('[data-category-tree]').forEach((tree) => {
+    const buttons = [...tree.querySelectorAll(':scope > li > div [data-category-toggle]')];
+    buttons.forEach((button) => {
+      button.addEventListener('click', () => {
+        const willExpand = button.getAttribute('aria-expanded') !== 'true';
+        buttons.forEach((candidate) => {
+          const panel = document.getElementById(candidate.getAttribute('aria-controls'));
+          const expanded = candidate === button && willExpand;
+          candidate.setAttribute('aria-expanded', String(expanded));
+          if (panel) panel.hidden = !expanded;
+        });
+      });
     });
+  });
+
+  document.querySelectorAll('[data-product-sort]').forEach((select) => {
+    select.addEventListener('change', () => select.form?.requestSubmit());
   });
 
   const filterOpen = document.querySelector('[data-product-filter-open]');
@@ -228,6 +229,11 @@
     filterOpen?.setAttribute('aria-expanded', 'false');
     filterDrawer?.setAttribute('aria-hidden', 'true');
     filterDrawer?.setAttribute('inert', '');
+    filterDrawer?.classList.remove('is-open');
+    filterOverlay?.classList.remove('is-visible');
+    window.setTimeout(() => {
+      if (!document.body.classList.contains('tk-product-filter-open') && filterOverlay) filterOverlay.hidden = true;
+    }, reducedMotion.matches ? 0 : 260);
     filterLastFocus?.focus();
   };
   const openFilter = () => {
@@ -236,7 +242,12 @@
     filterOpen?.setAttribute('aria-expanded', 'true');
     filterDrawer?.setAttribute('aria-hidden', 'false');
     filterDrawer?.removeAttribute('inert');
-    filterDrawer?.querySelector(focusableSelector)?.focus();
+    if (filterOverlay) filterOverlay.hidden = false;
+    requestAnimationFrame(() => {
+      filterDrawer?.classList.add('is-open');
+      filterOverlay?.classList.add('is-visible');
+      filterDrawer?.querySelector(focusableSelector)?.focus();
+    });
   };
   filterOpen?.addEventListener('click', openFilter);
   filterClose?.addEventListener('click', closeFilter);
@@ -244,6 +255,9 @@
   filterDrawer?.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') closeFilter();
     else trapFocus(filterDrawer, event);
+  });
+  window.matchMedia('(min-width: 1024px)').addEventListener('change', (event) => {
+    if (event.matches && document.body.classList.contains('tk-product-filter-open')) closeFilter();
   });
 
   const modal = document.querySelector('[data-product-modal]');

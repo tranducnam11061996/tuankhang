@@ -364,58 +364,6 @@ body .ft-middle .uk-list li:before{
 	color: #d80f19 !important;
 }
 
-.duytv-language .wpm-language-switcher{
-	padding: 0;
-	list-style: none;
-}
-
-.pc-language .wpm-language-switcher > li a ,
-.pc-language .wpm-language-switcher > li > span {
-	display: block;
-	position: relative;
-	padding: 5px 10px 5px 30px;
-	color: #000;
-	font-size: 13px;
-	line-height: 20px;
-	-webkit-transition: all 0.3s ease-in-out;
-	-o-transition: all 0.3s ease-in-out;
-	transition: all 0.3s ease-in-out;
-}
-
-.pc-language .wpm-switcher-dropdown a:hover, 
-.pc-language .wpm-switcher-list li a:hover, 
-.pc-language .wpm-switcher-list li.active a, 
-.pc-language .wpm-switcher-list li.active>span, 
-.pc-language .wpm-switcher-list li>span:hover {
-    color: #d80f19;
-}
-
-.pc-language .wpm-language-switcher > li a:before,
-.pc-language .wpm-language-switcher > li.active > span:before{
-	content: "";
-	display: block;
-	position: absolute;
-	width: 16px;
-	height: 11px;
-	left: 10px;
-	top: 50%;
-	-webkit-transform: translate(0, -50%);
-	-webkit-transform: translate(0, -50%);
-	-ms-transform: translate(0, -50%);
-	-o-transform: translate(0, -50%);
-	transform: translate(0, -50%);
-}
-
-.pc-language .wpm-language-switcher > li.wpm-item-language-vi a:before,
-.pc-language .wpm-language-switcher > li.active.wpm-item-language-vi > span:before{
-	background: url(../image/vn.png) 0px 0px no-repeat;
-}
-
-.pc-language .wpm-language-switcher > li.wpm-item-language-en a:before,
-.pc-language .wpm-language-switcher > li.active.wpm-item-language-en > span:before{
-	background: url(../image/en.jpg) 0px 0px no-repeat;
-}
-
 #cauchuyentuankhangx p {
 	margin: 20px auto 0px;
 	text-align: justify;

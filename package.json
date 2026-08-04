@@ -13,7 +13,12 @@
     "build:js": "esbuild ./assets/src/site.js --bundle --minify --target=es2020 --outfile=./assets/dist/site.min.js && esbuild ./assets/src/home.js --bundle --minify --target=es2020 --outfile=./assets/dist/home.min.js && esbuild ./assets/src/products.js --bundle --minify --target=es2020 --outfile=./assets/dist/products.min.js && esbuild ./assets/src/content.js --bundle --minify --target=es2020 --outfile=./assets/dist/content.min.js",
     "build:fonts": "node ./scripts/build-fonts.mjs",
     "build:images": "node ./scripts/build-images.mjs",
-    "build": "npm run build:fonts && npm run build:css && npm run build:js && npm run build:images"
+    "validate:unicode": "node ./scripts/validate-unicode.mjs",
+    "validate:unicode:local": "node ./scripts/validate-unicode.mjs --site=http://localhost/tuankhang",
+    "validate:database": "node ./scripts/validate-database.mjs",
+    "validate:site": "npm run validate:database && npm run validate:unicode:local && node ./scripts/audit-site.mjs --site=http://localhost/tuankhang",
+    "test:unicode": "node --test ./scripts/validate-unicode.test.mjs",
+    "build": "npm run validate:unicode && npm run build:fonts && npm run build:css && npm run build:js && npm run build:images"
   },
   "devDependencies": {
     "@tailwindcss/cli": "^4.1.11",
