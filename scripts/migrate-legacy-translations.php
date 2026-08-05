@@ -10,10 +10,7 @@
 
 declare(strict_types=1);
 
-if (PHP_SAPI !== 'cli') {
-    fwrite(STDERR, "This script is CLI-only.\n");
-    exit(2);
-}
+require_once __DIR__ . '/cli-bootstrap.php';
 
 function tk_legacy_marker_expression(): string
 {

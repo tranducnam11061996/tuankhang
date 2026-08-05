@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+require_once __DIR__ . '/cli-bootstrap.php';
+
 $root = dirname(__DIR__, 4);
 require_once $root . '/wp-load.php';
 

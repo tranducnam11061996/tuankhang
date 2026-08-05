@@ -50,4 +50,33 @@
     if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
     if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
   });
+
+  const tocLinks = [...document.querySelectorAll('[data-toc-link]')];
+  const sectionIds = [...new Set(tocLinks.map((link) => decodeURIComponent(link.hash.slice(1))).filter(Boolean))];
+  const sections = sectionIds.map((id) => document.getElementById(id)).filter(Boolean);
+  const setActiveSection = (id) => {
+    tocLinks.forEach((link) => {
+      const active = decodeURIComponent(link.hash.slice(1)) === id;
+      if (active) link.setAttribute('aria-current', 'location');
+      else link.removeAttribute('aria-current');
+    });
+  };
+
+  if (sections.length) {
+    const hashId = decodeURIComponent(window.location.hash.slice(1));
+    setActiveSection(sectionIds.includes(hashId) ? hashId : sections[0].id);
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver((entries) => {
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => Math.abs(a.boundingClientRect.top) - Math.abs(b.boundingClientRect.top));
+        if (visible[0]) setActiveSection(visible[0].target.id);
+      }, { rootMargin: '-10% 0px -72% 0px', threshold: 0 });
+      sections.forEach((section) => observer.observe(section));
+    }
+    window.addEventListener('hashchange', () => {
+      const id = decodeURIComponent(window.location.hash.slice(1));
+      if (sectionIds.includes(id)) setActiveSection(id);
+    });
+  }
 })();

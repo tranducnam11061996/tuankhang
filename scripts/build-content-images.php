@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+require_once __DIR__ . '/cli-bootstrap.php';
+
 ini_set('memory_limit', '1024M');
 
 $root = dirname(__DIR__, 4);

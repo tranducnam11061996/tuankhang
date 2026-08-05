@@ -105,17 +105,4 @@
     } else deferredImages.forEach(loadDeferredImage);
   }
 
-  let facebookLoaded = false;
-  const loadFacebook = () => {
-    if (facebookLoaded || document.getElementById('facebook-jssdk')) return;
-    facebookLoaded = true;
-    window.fbAsyncInit = () => window.FB?.init({ xfbml: true, version: 'v11.0' });
-    const script = document.createElement('script');
-    script.id = 'facebook-jssdk';
-    script.async = true;
-    script.defer = true;
-    script.src = 'https://connect.facebook.net/vi_VN/sdk/xfbml.customerchat.js';
-    document.body.appendChild(script);
-  };
-  ['pointerdown', 'keydown', 'touchstart'].forEach((eventName) => window.addEventListener(eventName, loadFacebook, { once: true, passive: true }));
 })();

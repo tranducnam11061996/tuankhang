@@ -3,10 +3,7 @@
  * Auditable CLI helper for updating/installing the site's approved plugins.
  */
 
-if (PHP_SAPI !== 'cli') {
-    fwrite(STDERR, "CLI only.\n");
-    exit(1);
-}
+require_once __DIR__ . '/cli-bootstrap.php';
 
 require_once dirname(__DIR__, 4) . '/wp-load.php';
 require_once ABSPATH . 'wp-admin/includes/plugin.php';

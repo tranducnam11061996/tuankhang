@@ -17,6 +17,8 @@
     "validate:unicode:local": "node ./scripts/validate-unicode.mjs --site=http://localhost/tuankhang",
     "validate:database": "node ./scripts/validate-database.mjs",
     "validate:site": "npm run validate:database && npm run validate:unicode:local && node ./scripts/audit-site.mjs --site=http://localhost/tuankhang",
+    "test": "node --test ./scripts/validate-unicode.test.mjs ./scripts/security.test.mjs ./scripts/font-integrity.test.mjs",
+    "test:security": "node --test ./scripts/security.test.mjs ./scripts/font-integrity.test.mjs",
     "test:unicode": "node --test ./scripts/validate-unicode.test.mjs",
     "build": "npm run validate:unicode && npm run build:fonts && npm run build:css && npm run build:js && npm run build:images"
   },

@@ -275,19 +275,26 @@ function tk_disable_emoji_assets_for_tailwind()
 }
 add_action('wp', 'tk_disable_emoji_assets_for_tailwind', 0);
 
-add_action('admin_init', 'hide_editor');
-function hide_editor()
+function tk_hide_editor_for_settings_page()
 {
-    // Get the Post ID.
-    $post_id = $_GET['post'] ? $_GET['post'] : $_POST['post_ID'];
-    if (!isset($post_id)) return;
-    // Hide the editor on a page with a specific page template
-    // Get the name of the Page Template file.
-    $template_file = get_post_meta($post_id, '_wp_page_template', true);
-    if ($template_file == 'page-caidat.php') { // the filename of the page template
+    if (!isset($_GET['post']) || !is_scalar($_GET['post'])) {
+        return;
+    }
+
+    $post_id = absint(wp_unslash((string) $_GET['post']));
+    if (!$post_id || !current_user_can('edit_post', $post_id)) {
+        return;
+    }
+
+    if ('page' !== get_post_type($post_id)) {
+        return;
+    }
+
+    if ('page-caidat.php' === get_page_template_slug($post_id)) {
         remove_post_type_support('page', 'editor');
     }
 }
+add_action('load-post.php', 'tk_hide_editor_for_settings_page');
 
 function custom_admin_css_dinh()
 {
