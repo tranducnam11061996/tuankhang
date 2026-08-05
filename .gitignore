@@ -1,3 +1,35 @@
-node_modules/
+# WordPress-generated content
+/uploads/
+/cache/
+/upgrade/
+
+# Local dependencies
+**/node_modules/
+
+# Runtime logs
 *.log
-error_log
+**/error_log
+
+# Local secrets and certificates
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Database and backup artifacts
+*.sql
+*.sql.gz
+*.bak
+*~
+
+# Generated plugin packages
+/plugins/*.zip
+
+# OS and editor metadata
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
