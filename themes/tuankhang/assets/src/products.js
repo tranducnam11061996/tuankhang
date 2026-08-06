@@ -391,6 +391,51 @@
   }
 
   document.querySelectorAll('[data-product-video-play]').forEach((button) => {
+    const poster = button.querySelector('[data-product-video-poster]');
+    if (poster instanceof HTMLImageElement) {
+      let fallbacks = [];
+      let lastFailedSource = '';
+
+      try {
+        const parsedFallbacks = JSON.parse(poster.dataset.videoPosterFallbacks || '[]');
+        if (Array.isArray(parsedFallbacks)) {
+          fallbacks = parsedFallbacks.filter((url) => typeof url === 'string' && url.length > 0);
+        }
+      } catch (_) {
+        fallbacks = [];
+      }
+
+      const loadFallback = () => {
+        const failedSource = poster.currentSrc || poster.src;
+        if (failedSource && failedSource === lastFailedSource) return;
+        lastFailedSource = failedSource;
+        poster.classList.remove('is-loaded');
+
+        const nextSource = fallbacks.shift();
+        if (nextSource) {
+          poster.src = nextSource;
+          return;
+        }
+        poster.remove();
+      };
+      const showPoster = () => {
+        // YouTube can return a decodable 120x90 placeholder with a 404 status,
+        // which fires `load` instead of `error` in some browsers.
+        if (poster.naturalWidth < 640 && fallbacks.length > 0) {
+          loadFallback();
+          return;
+        }
+        poster.classList.add('is-loaded');
+      };
+
+      poster.addEventListener('load', showPoster);
+      poster.addEventListener('error', loadFallback);
+      if (poster.complete) {
+        if (poster.naturalWidth > 0) showPoster();
+        else loadFallback();
+      }
+    }
+
     button.addEventListener('click', () => {
       const source = button.dataset.videoSrc;
       if (!source) return;
@@ -399,7 +444,9 @@
       iframe.title = document.documentElement.lang.startsWith('en') ? 'Product video' : 'Video giới thiệu sản phẩm';
       iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
       iframe.allowFullscreen = true;
+      iframe.tabIndex = 0;
       button.parentElement?.replaceChildren(iframe);
+      window.requestAnimationFrame(() => iframe.focus());
     }, { once: true });
   });
 })();

@@ -2,10 +2,10 @@
 /**
  * Plugin Name:       Tuan Khang Core
  * Description:       Registers Tuan Khang content types and version-controlled ACF fields.
- * Version:           1.4.1
+ * Version:           1.5.1
  * Requires at least: 6.0
  * Requires PHP:      7.4
- * Requires Plugins:  advanced-custom-fields
+ * Requires Plugins:  advanced-custom-fields-pro
  * Author:            Tuan Khang
  * Text Domain:       tuankhang-core
  */
@@ -14,10 +14,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'TUANKHANG_CORE_VERSION', '1.4.1' );
+define( 'TUANKHANG_CORE_VERSION', '1.5.1' );
 define( 'TUANKHANG_CORE_FILE', __FILE__ );
 define( 'TUANKHANG_CORE_PATH', plugin_dir_path( __FILE__ ) );
 
+require_once TUANKHANG_CORE_PATH . 'includes/acf-update-policy.php';
 require_once TUANKHANG_CORE_PATH . 'includes/content-types.php';
 require_once TUANKHANG_CORE_PATH . 'includes/acf-schema.php';
 require_once TUANKHANG_CORE_PATH . 'includes/acf-home-premium.php';

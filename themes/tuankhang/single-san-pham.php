@@ -16,10 +16,13 @@ $gallery = tk_product_gallery_items($product_id);
 $highlights = tk_product_premium_highlights($product_id);
 $specs = tk_product_premium_specs($product_id);
 $catalogue = tk_product_catalogue_data($product_id);
-$video_embed = tk_product_video_embed_url($product_id);
+$video = tk_product_video_data($product_id);
 $rich_content = tk_product_normalize_rich_content($product_id);
 $hotline = (string) tk_home_field('wpcf-so-hotline');
 $phone = preg_replace('/[^0-9+]/', '', $hotline);
+$zalo_phone = preg_replace('/\D+/', '', $hotline);
+$zalo_url = $zalo_phone ? 'https://zalo.me/' . rawurlencode($zalo_phone) : '';
+$messenger_url = 'https://m.me/108890274790969';
 $related_ids = tk_product_related_ids($product_id, 4);
 $breadcrumbs = tk_product_breadcrumbs($product_id);
 $section_nav = array();
@@ -37,7 +40,7 @@ if ($highlights) {
 if ($specs) {
     $section_nav[] = array('id' => 'product-specifications', 'label' => tk_home_text('Thông số', 'Specifications'));
 }
-if ($video_embed) {
+if ($video) {
     $section_nav[] = array('id' => 'product-video', 'label' => tk_home_text('Video', 'Video'));
 }
 if ($rich_content) {
@@ -241,10 +244,9 @@ $section_nav[] = array('id' => 'product-consultation', 'label' => tk_home_text('
             <?php if ($short_description) : ?>
                 <section id="product-overview" class="tk-product-section tk-product-overview" data-product-section data-reveal aria-labelledby="product-overview-title">
                     <div class="tk-container tk-product-section-grid">
-                        <div class="tk-product-section-heading">
+                        <div class="tk-product-section-heading tk-product-section-heading-horizontal">
                             <span>01</span>
-                            <p><?php echo esc_html(tk_home_text('Tổng quan', 'Overview')); ?></p>
-                            <h2 id="product-overview-title"><?php echo esc_html(tk_home_text('Giải pháp được lựa chọn cho thực hành nha khoa hiện đại', 'A solution for modern dental practice')); ?></h2>
+                            <div><p><?php echo esc_html(tk_home_text('Tổng quan', 'Overview')); ?></p><h2 id="product-overview-title"><?php echo esc_html(tk_home_text('Giải pháp được lựa chọn cho thực hành nha khoa hiện đại', 'A solution for modern dental practice')); ?></h2></div>
                         </div>
                         <div class="tk-product-overview-copy"><?php echo wp_kses_post($short_description); ?></div>
                     </div>
@@ -352,17 +354,59 @@ $section_nav[] = array('id' => 'product-consultation', 'label' => tk_home_text('
                 </section>
             <?php endif; ?>
 
-            <?php if ($video_embed) : ?>
+            <?php if ($video) : ?>
                 <section id="product-video" class="tk-product-section tk-product-video" data-product-section data-reveal aria-labelledby="product-video-title">
                     <div class="tk-container">
                         <div class="tk-product-section-heading tk-product-section-heading-horizontal">
                             <span>04</span>
-                            <div><p><?php echo esc_html(tk_home_text('Trình diễn', 'Demonstration')); ?></p><h2 id="product-video-title"><?php echo esc_html(tk_home_text('Khám phá sản phẩm qua video', 'Explore the product in video')); ?></h2></div>
+                            <div><p><?php echo esc_html(tk_home_text('Video', 'Demonstration')); ?></p></div>
                         </div>
                         <div class="tk-product-video-frame" data-product-video>
-                            <button type="button" data-product-video-play data-video-src="<?php echo esc_url($video_embed); ?>">
-                                <span class="tk-product-video-play-icon"><svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor"><path d="m9 7 8 5-8 5Z"/></svg></span>
-                                <span><?php echo esc_html(tk_home_text('Phát video giới thiệu sản phẩm', 'Play product introduction')); ?></span>
+                            <button
+                                type="button"
+                                data-product-video-play
+                                data-video-src="<?php echo esc_url($video['embed_url']); ?>"
+                                data-video-provider="<?php echo esc_attr($video['provider']); ?>"
+                                aria-label="<?php echo esc_attr(tk_home_text('Phát video giới thiệu sản phẩm', 'Play product introduction')); ?>"
+                            >
+                                <?php if (!empty($video['poster_url'])) : ?>
+                                    <?php if (!empty($video['poster_id'])) : ?>
+                                        <?php
+                                        echo wp_get_attachment_image(
+                                            (int) $video['poster_id'],
+                                            'full',
+                                            false,
+                                            array(
+                                                'class' => 'tk-product-video-poster',
+                                                'alt' => '',
+                                                'loading' => 'lazy',
+                                                'decoding' => 'async',
+                                                'fetchpriority' => 'low',
+                                                'sizes' => '(min-width: 1200px) 1200px, calc(100vw - 32px)',
+                                                'data-product-video-poster' => '',
+                                                'data-video-poster-fallbacks' => '[]',
+                                            )
+                                        );
+                                        ?>
+                                    <?php else : ?>
+                                        <img
+                                            class="tk-product-video-poster"
+                                            src="<?php echo esc_url($video['poster_url']); ?>"
+                                            alt=""
+                                            width="1280"
+                                            height="720"
+                                            loading="lazy"
+                                            decoding="async"
+                                            fetchpriority="low"
+                                            data-product-video-poster
+                                            data-video-poster-fallbacks="<?php echo esc_attr(wp_json_encode($video['poster_fallbacks'])); ?>"
+                                        >
+                                    <?php endif; ?>
+                                <?php endif; ?>
+                                <span class="tk-product-video-play-ui">
+                                    <span class="tk-product-video-play-icon"><svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor"><path d="m9 7 8 5-8 5Z"/></svg></span>
+                                    <span class="tk-product-video-play-caption"><?php echo esc_html(tk_home_text('Phát video giới thiệu sản phẩm', 'Play product introduction')); ?></span>
+                                </span>
                             </button>
                         </div>
                     </div>
@@ -370,7 +414,7 @@ $section_nav[] = array('id' => 'product-consultation', 'label' => tk_home_text('
             <?php endif; ?>
 
             <?php if ($rich_content) : ?>
-                <section id="product-details" class="tk-product-section tk-product-details" data-product-section data-reveal aria-labelledby="product-details-title">
+                <section id="product-details" class="tk-product-section tk-product-details" data-product-section aria-labelledby="product-details-title">
                     <div class="tk-container">
                         <header class="tk-product-details-header">
                             <p><?php echo esc_html(tk_home_text('Thông tin chuyên sâu', 'In-depth information')); ?></p>
@@ -386,22 +430,70 @@ $section_nav[] = array('id' => 'product-consultation', 'label' => tk_home_text('
                     <div class="tk-product-consultation-copy">
                         <p><?php echo esc_html(tk_home_text('Đồng hành chuyên môn', 'Clinical partnership')); ?></p>
                         <h2 id="product-consultation-title"><?php echo esc_html(tk_home_text('Cần một giải pháp phù hợp cho phòng khám của bạn?', 'Need the right solution for your practice?')); ?></h2>
-                        <span><?php echo esc_html(tk_home_text('Chia sẻ nhu cầu của bạn. Đội ngũ Tuấn Khang sẽ tư vấn sản phẩm, tài liệu và phương án hỗ trợ phù hợp.', 'Tell us what you need. Tuan Khang will recommend suitable products, documentation and support.')); ?></span>
+                        <span class="tk-product-consultation-description">
+                            <span><?php echo esc_html(tk_home_text('Chia sẻ nhu cầu của bạn. Đội ngũ Tuấn Khang sẽ tư vấn sản phẩm, tài liệu', 'Tell us what you need. Tuan Khang will recommend suitable products and documentation')); ?></span>
+                            <span><?php echo esc_html(tk_home_text('và phương án hỗ trợ phù hợp.', 'with the right support.')); ?></span>
+                        </span>
                     </div>
                     <div class="tk-product-consultation-actions">
-                        <button
-                            type="button"
-                            class="tk-product-cta tk-product-cta-light"
-                            data-product-modal-open
-                            data-cta-source="final"
-                            data-tk-event="tk_product_cta_click"
-                            data-tk-action="consultation"
-                            data-tk-placement="final"
-                        >
-                            <span><?php echo esc_html(tk_home_text('Trao đổi với chuyên gia', 'Speak with an expert')); ?></span>
-                            <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 10h12m-4-4 4 4-4 4"/></svg>
-                        </button>
-                        <?php if ($hotline) : ?><a href="tel:<?php echo esc_attr($phone); ?>" data-tk-event="tk_product_cta_click" data-tk-action="hotline" data-tk-placement="final"><?php echo esc_html($hotline); ?></a><?php endif; ?>
+                        <div class="tk-product-consultation-primary">
+                            <button
+                                type="button"
+                                class="tk-product-consultation-form-trigger"
+                                data-product-modal-open
+                                data-cta-source="final"
+                                data-tk-event="tk_product_cta_click"
+                                data-tk-action="consultation"
+                                data-tk-placement="final"
+                            >
+                                <span class="tk-product-consultation-form-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6.75 4.25h10.5A1.75 1.75 0 0 1 19 6v13.25H8.5A2.5 2.5 0 0 1 6 16.75V5a.75.75 0 0 1 .75-.75Z"/><path d="M9.25 4.25v15M12.25 8h3.75M12.25 11h3.75"/></svg>
+                                </span>
+                                <span><?php echo esc_html(tk_home_text('Trao đổi với chuyên gia', 'Speak with an expert')); ?></span>
+                            </button>
+                            <span class="tk-product-consultation-primary-divider" aria-hidden="true"></span>
+                            <div class="tk-product-consultation-socials" role="group" aria-label="<?php echo esc_attr(tk_home_text('Kênh tư vấn trực tuyến', 'Online consultation channels')); ?>">
+                                <?php if ($zalo_url) : ?>
+                                    <a
+                                        class="tk-product-consultation-social tk-product-consultation-social-zalo"
+                                        href="<?php echo esc_url($zalo_url); ?>"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        aria-label="<?php echo esc_attr(tk_home_text('Chat với Tuấn Khang qua Zalo, mở trong tab mới', 'Chat with Tuan Khang on Zalo, opens in a new tab')); ?>"
+                                        data-tooltip="<?php echo esc_attr(tk_home_text('Chat qua Zalo', 'Chat on Zalo')); ?>"
+                                        data-tk-event="tk_product_cta_click"
+                                        data-tk-action="zalo_chat"
+                                        data-tk-placement="final"
+                                    >
+                                        <svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><path d="M11 8.5h26a7 7 0 0 1 7 7v14a7 7 0 0 1-7 7H24l-7.5 4v-4H11a7 7 0 0 1-7-7v-14a7 7 0 0 1 7-7Z" fill="none" stroke="currentColor" stroke-width="2.5"/><text x="24" y="27.5" fill="currentColor" font-family="Arial, sans-serif" font-size="12" font-weight="700" text-anchor="middle">Zalo</text></svg>
+                                    </a>
+                                <?php endif; ?>
+                                <a
+                                    class="tk-product-consultation-social tk-product-consultation-social-messenger"
+                                    href="<?php echo esc_url($messenger_url); ?>"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    aria-label="<?php echo esc_attr(tk_home_text('Chat với Tuấn Khang qua Facebook Messenger, mở trong tab mới', 'Chat with Tuan Khang on Facebook Messenger, opens in a new tab')); ?>"
+                                    data-tooltip="<?php echo esc_attr(tk_home_text('Chat Facebook', 'Chat on Facebook')); ?>"
+                                    data-tk-event="tk_product_cta_click"
+                                    data-tk-action="facebook_chat"
+                                    data-tk-placement="final"
+                                >
+                                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M12 2C6.48 2 2 6.15 2 11.27c0 2.91 1.45 5.5 3.72 7.2V22l3.4-1.87c.91.25 1.88.39 2.88.39 5.52 0 10-4.15 10-9.25S17.52 2 12 2Zm.99 12.48-2.55-2.72-4.98 2.72 5.48-5.82 2.62 2.72 4.91-2.72-5.48 5.82Z"/></svg>
+                                </a>
+                            </div>
+                        </div>
+                        <?php if ($hotline) : ?>
+                            <a class="tk-product-hotline" href="tel:<?php echo esc_attr($phone); ?>" data-tk-event="tk_product_cta_click" data-tk-action="hotline" data-tk-placement="final">
+                                <span class="tk-product-hotline-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M7.2 3.5 4.8 4.7c-.8.4-1.2 1.3-1 2.1 1.5 6.6 6.8 11.9 13.4 13.4.9.2 1.8-.2 2.2-1l1.1-2.4-4.3-2-1.1 1.8c-.3.5-.9.7-1.4.4-2.9-1.4-5.3-3.8-6.7-6.7-.3-.5-.1-1.1.4-1.4l1.8-1.1Z"/></svg>
+                                </span>
+                                <span class="tk-product-hotline-copy">
+                                    <small><?php echo esc_html(tk_home_text('Hotline hỗ trợ', 'Support hotline')); ?></small>
+                                    <strong><?php echo esc_html($hotline); ?></strong>
+                                </span>
+                            </a>
+                        <?php endif; ?>
                     </div>
                 </div>
             </section>
