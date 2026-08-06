@@ -5,6 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 define( 'TUANKHANG_CORE_DB_VERSION', '1.0.0' );
+define( 'TUANKHANG_CORE_PRODUCT_REPEATER_DB_VERSION', '1.0.0' );
 define( 'TUANKHANG_CORE_CONTENT_UNICODE_DB_VERSION', '1.0.0' );
 define( 'TUANKHANG_CORE_COMMENTS_DB_VERSION', '1.1.0' );
 
@@ -121,6 +122,263 @@ function tuankhang_core_maybe_migrate() {
 	update_option( 'tuankhang_core_db_version', TUANKHANG_CORE_DB_VERSION, false );
 }
 add_action( 'acf/init', 'tuankhang_core_maybe_migrate', 20 );
+
+/**
+ * Return the dynamic product repeater schema used by the migration.
+ *
+ * @return array<string,array<string,mixed>>
+ */
+function tuankhang_core_product_repeater_definitions() {
+	return array(
+		'gallery' => array(
+			'field_key'   => 'field_tk_product_gallery',
+			'field_name'  => 'tk_product_gallery',
+			'row_builder' => 'tuankhang_core_legacy_product_gallery_rows',
+			'sub_fields'  => array(
+				'field_tk_product_gallery_image' => 'tk_product_gallery_image',
+			),
+		),
+		'highlights' => array(
+			'field_key'   => 'field_tk_product_highlights',
+			'field_name'  => 'tk_product_highlights',
+			'row_builder' => 'tuankhang_core_legacy_product_highlight_rows',
+			'sub_fields'  => array(
+				'field_tk_product_highlight_title'       => 'tk_product_highlight_title',
+				'field_tk_product_highlight_description' => 'tk_product_highlight_description',
+			),
+		),
+		'specs' => array(
+			'field_key'   => 'field_tk_product_specs',
+			'field_name'  => 'tk_product_specs',
+			'row_builder' => 'tuankhang_core_legacy_product_spec_rows',
+			'sub_fields'  => array(
+				'field_tk_product_spec_label' => 'tk_product_spec_label',
+				'field_tk_product_spec_value' => 'tk_product_spec_value',
+			),
+		),
+	);
+}
+
+/**
+ * Build gallery repeater rows from legacy fixed image slots.
+ *
+ * @param int $post_id Product post ID.
+ * @return array<int,array<string,int>>
+ */
+function tuankhang_core_legacy_product_gallery_rows( $post_id ) {
+	$rows = array();
+
+	for ( $index = 1; $index <= 5; $index++ ) {
+		$image = get_post_meta( $post_id, 'tk_product_gallery_image_' . $index, true );
+		if ( is_array( $image ) ) {
+			$image = isset( $image['ID'] ) ? $image['ID'] : ( isset( $image['id'] ) ? $image['id'] : 0 );
+		}
+
+		$image_id = absint( $image );
+		if ( $image_id ) {
+			$rows[] = array( 'field_tk_product_gallery_image' => $image_id );
+		}
+	}
+
+	return $rows;
+}
+
+/**
+ * Build highlight repeater rows from legacy fixed title/description slots.
+ *
+ * @param int $post_id Product post ID.
+ * @return array<int,array<string,string>>
+ */
+function tuankhang_core_legacy_product_highlight_rows( $post_id ) {
+	$rows = array();
+
+	for ( $index = 1; $index <= 4; $index++ ) {
+		$title       = trim( (string) get_post_meta( $post_id, 'tk_product_highlight_title_' . $index, true ) );
+		$description = trim( (string) get_post_meta( $post_id, 'tk_product_highlight_description_' . $index, true ) );
+		if ( '' === $title && '' === $description ) {
+			continue;
+		}
+
+		$rows[] = array(
+			'field_tk_product_highlight_title'       => $title ? $title : sprintf( 'Điểm nổi bật %d', $index ),
+			'field_tk_product_highlight_description' => $description,
+		);
+	}
+
+	return $rows;
+}
+
+/**
+ * Build custom specification repeater rows from complete legacy slot pairs.
+ *
+ * @param int $post_id Product post ID.
+ * @return array<int,array<string,string>>
+ */
+function tuankhang_core_legacy_product_spec_rows( $post_id ) {
+	$rows = array();
+
+	for ( $index = 1; $index <= 8; $index++ ) {
+		$label = trim( (string) get_post_meta( $post_id, 'tk_product_spec_label_' . $index, true ) );
+		$value = trim( (string) get_post_meta( $post_id, 'tk_product_spec_value_' . $index, true ) );
+		if ( '' === $label || '' === $value ) {
+			continue;
+		}
+
+		$rows[] = array(
+			'field_tk_product_spec_label' => $label,
+			'field_tk_product_spec_value' => $value,
+		);
+	}
+
+	return $rows;
+}
+
+/**
+ * Verify ACF's raw parent, subfield and reference meta for migrated rows.
+ *
+ * @param int                 $post_id   Product post ID.
+ * @param array<string,mixed> $definition Repeater definition.
+ * @param array<int,array<string,mixed>> $rows Expected rows keyed by subfield key.
+ * @return bool
+ */
+function tuankhang_core_verify_product_repeater_storage( $post_id, $definition, $rows ) {
+	$field_name = $definition['field_name'];
+	$field_key  = $definition['field_key'];
+	$row_count  = count( $rows );
+
+	if ( ! metadata_exists( 'post', $post_id, $field_name )
+		|| $field_key !== get_post_meta( $post_id, '_' . $field_name, true ) ) {
+		return false;
+	}
+
+	$stored_count = get_post_meta( $post_id, $field_name, true );
+	if ( $row_count ) {
+		if ( $row_count !== (int) $stored_count ) {
+			return false;
+		}
+	} elseif ( '' !== (string) $stored_count && '0' !== (string) $stored_count ) {
+		return false;
+	}
+
+	foreach ( $rows as $row_index => $row ) {
+		foreach ( $definition['sub_fields'] as $sub_field_key => $sub_field_name ) {
+			if ( ! array_key_exists( $sub_field_key, $row ) ) {
+				return false;
+			}
+
+			$meta_name = $field_name . '_' . $row_index . '_' . $sub_field_name;
+			if ( (string) $row[ $sub_field_key ] !== (string) get_post_meta( $post_id, $meta_name, true )
+				|| $sub_field_key !== get_post_meta( $post_id, '_' . $meta_name, true ) ) {
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
+
+/**
+ * Migrate one product without overwriting initialized repeater parents.
+ *
+ * @param int $post_id Product post ID.
+ * @return bool
+ */
+function tuankhang_core_migrate_product_repeaters_for_post( $post_id ) {
+	$post = get_post( $post_id );
+	if ( ! $post || 'san-pham' !== $post->post_type || ! function_exists( 'update_field' ) ) {
+		return false;
+	}
+
+	foreach ( tuankhang_core_product_repeater_definitions() as $group_name => $definition ) {
+		$field_name = $definition['field_name'];
+		$state_meta = '_tuankhang_core_product_repeater_migration_' . $group_name;
+		$state      = get_post_meta( $post_id, $state_meta, true );
+
+		// A parent without our pending marker belongs to the new schema already.
+		if ( metadata_exists( 'post', $post_id, $field_name ) && 'pending' !== $state ) {
+			continue;
+		}
+
+		update_post_meta( $post_id, $state_meta, 'pending' );
+		$rows = call_user_func( $definition['row_builder'], $post_id );
+		update_field( $definition['field_key'], $rows, $post_id );
+
+		// ACF 5.x may not create parent metadata for a newly initialized empty repeater.
+		if ( empty( $rows ) && ! metadata_exists( 'post', $post_id, $field_name ) ) {
+			update_post_meta( $post_id, $field_name, '' );
+			update_post_meta( $post_id, '_' . $field_name, $definition['field_key'] );
+		}
+
+		wp_cache_delete( $post_id, 'post_meta' );
+		if ( ! tuankhang_core_verify_product_repeater_storage( $post_id, $definition, $rows ) ) {
+			return false;
+		}
+
+		update_post_meta( $post_id, $state_meta, TUANKHANG_CORE_PRODUCT_REPEATER_DB_VERSION );
+	}
+
+	return true;
+}
+
+/**
+ * Convert fixed product slots to ACF PRO repeaters once.
+ */
+function tuankhang_core_maybe_migrate_product_repeaters() {
+	$version_option = 'tuankhang_core_product_repeater_db_version';
+	$lock_option    = 'tuankhang_core_product_repeater_migration_lock';
+
+	if ( TUANKHANG_CORE_PRODUCT_REPEATER_DB_VERSION === get_option( $version_option ) ) {
+		return;
+	}
+
+	if ( ! function_exists( 'update_field' )
+		|| ! function_exists( 'acf_get_field' )
+		|| ! acf_get_field( 'field_tk_product_gallery' ) ) {
+		return;
+	}
+
+	$lock_time = (int) get_option( $lock_option, 0 );
+	if ( $lock_time && time() - $lock_time < 300 ) {
+		return;
+	}
+	if ( $lock_time ) {
+		delete_option( $lock_option );
+	}
+	if ( ! add_option( $lock_option, time(), '', false ) ) {
+		return;
+	}
+
+	$success = false;
+	try {
+		$post_ids = get_posts(
+			array(
+				'post_type'      => 'san-pham',
+				'post_status'    => 'any',
+				'posts_per_page' => -1,
+				'fields'         => 'ids',
+				'orderby'        => 'ID',
+				'order'          => 'ASC',
+				'no_found_rows'  => true,
+			)
+		);
+
+		foreach ( $post_ids as $post_id ) {
+			if ( ! tuankhang_core_migrate_product_repeaters_for_post( (int) $post_id ) ) {
+				throw new RuntimeException( 'Repeater verification failed for product ' . (int) $post_id . '.' );
+			}
+		}
+
+		$success = true;
+	} catch ( Throwable $error ) {
+		error_log( 'Tuan Khang Core product repeater migration: ' . $error->getMessage() );
+	}
+
+	delete_option( $lock_option );
+	if ( $success ) {
+		update_option( $version_option, TUANKHANG_CORE_PRODUCT_REPEATER_DB_VERSION, false );
+	}
+}
+add_action( 'acf/init', 'tuankhang_core_maybe_migrate_product_repeaters', 30 );
 
 /**
  * Return the reviewed permalink targets for legacy public posts.

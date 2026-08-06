@@ -22,10 +22,10 @@
             "placeholder": "",
             "prepend": "",
             "append": "",
-            "message": "??nh d?u l? s?n ph?m n?i b?t",
+            "message": "Đánh dấu là sản phẩm nổi bật",
             "ui": 1,
-            "ui_on_text": "C?",
-            "ui_off_text": "Kh?ng"
+            "ui_on_text": "Có",
+            "ui_off_text": "Không"
         },
         {
             "key": "field_6944cc2b069c2",

@@ -86,9 +86,13 @@ $products = get_posts(array(
 
 foreach ($products as $post_id) {
     $attachment_ids = array_filter(array(get_post_thumbnail_id((int) $post_id)));
-    for ($index = 1; $index <= 5; $index++) {
-        $gallery_id = (int) get_post_meta((int) $post_id, 'tk_product_gallery_image_' . $index, true);
-        if ($gallery_id) $attachment_ids[] = $gallery_id;
+    if (function_exists('tk_product_gallery_attachment_ids')) {
+        $attachment_ids = array_merge($attachment_ids, tk_product_gallery_attachment_ids((int) $post_id));
+    } else {
+        for ($index = 1; $index <= 5; $index++) {
+            $gallery_id = (int) get_post_meta((int) $post_id, 'tk_product_gallery_image_' . $index, true);
+            if ($gallery_id) $attachment_ids[] = $gallery_id;
+        }
     }
     if (preg_match_all('/wp-image-(\d+)/', (string) get_post_field('post_content', (int) $post_id), $matches)) {
         $attachment_ids = array_merge($attachment_ids, array_map('intval', $matches[1]));
