@@ -18,18 +18,12 @@ $specs = tk_product_premium_specs($product_id);
 $catalogue = tk_product_catalogue_data($product_id);
 $video = tk_product_video_data($product_id);
 $rich_content = tk_product_normalize_rich_content($product_id);
-$hotline = (string) tk_home_field('wpcf-so-hotline');
+$hotline = (string) tk_site_option('contact.hotline');
 $phone = preg_replace('/[^0-9+]/', '', $hotline);
-$zalo_phone = preg_replace('/\D+/', '', $hotline);
-$zalo_url = $zalo_phone ? 'https://zalo.me/' . rawurlencode($zalo_phone) : '';
-$messenger_url = 'https://m.me/108890274790969';
 $related_ids = tk_product_related_ids($product_id, 4);
 $breadcrumbs = tk_product_breadcrumbs($product_id);
 $section_nav = array();
-$dialog_style_path = get_theme_file_path('/assets/dist/product-dialogs.min.css');
-$dialog_style_url = is_file($dialog_style_path)
-    ? add_query_arg('ver', (string) filemtime($dialog_style_path), get_theme_file_uri('/assets/dist/product-dialogs.min.css'))
-    : '';
+$dialog_style_url = tk_product_dialog_style_url();
 
 if ($short_description) {
     $section_nav[] = array('id' => 'product-overview', 'label' => tk_home_text('Tổng quan', 'Overview'));
@@ -436,53 +430,11 @@ $section_nav[] = array('id' => 'product-consultation', 'label' => tk_home_text('
                         </span>
                     </div>
                     <div class="tk-product-consultation-actions">
-                        <div class="tk-product-consultation-primary">
-                            <button
-                                type="button"
-                                class="tk-product-consultation-form-trigger"
-                                data-product-modal-open
-                                data-cta-source="final"
-                                data-tk-event="tk_product_cta_click"
-                                data-tk-action="consultation"
-                                data-tk-placement="final"
-                            >
-                                <span class="tk-product-consultation-form-icon" aria-hidden="true">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6.75 4.25h10.5A1.75 1.75 0 0 1 19 6v13.25H8.5A2.5 2.5 0 0 1 6 16.75V5a.75.75 0 0 1 .75-.75Z"/><path d="M9.25 4.25v15M12.25 8h3.75M12.25 11h3.75"/></svg>
-                                </span>
-                                <span><?php echo esc_html(tk_home_text('Trao đổi với chuyên gia', 'Speak with an expert')); ?></span>
-                            </button>
-                            <span class="tk-product-consultation-primary-divider" aria-hidden="true"></span>
-                            <div class="tk-product-consultation-socials" role="group" aria-label="<?php echo esc_attr(tk_home_text('Kênh tư vấn trực tuyến', 'Online consultation channels')); ?>">
-                                <?php if ($zalo_url) : ?>
-                                    <a
-                                        class="tk-product-consultation-social tk-product-consultation-social-zalo"
-                                        href="<?php echo esc_url($zalo_url); ?>"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        aria-label="<?php echo esc_attr(tk_home_text('Chat với Tuấn Khang qua Zalo, mở trong tab mới', 'Chat with Tuan Khang on Zalo, opens in a new tab')); ?>"
-                                        data-tooltip="<?php echo esc_attr(tk_home_text('Chat qua Zalo', 'Chat on Zalo')); ?>"
-                                        data-tk-event="tk_product_cta_click"
-                                        data-tk-action="zalo_chat"
-                                        data-tk-placement="final"
-                                    >
-                                        <svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><path d="M11 8.5h26a7 7 0 0 1 7 7v14a7 7 0 0 1-7 7H24l-7.5 4v-4H11a7 7 0 0 1-7-7v-14a7 7 0 0 1 7-7Z" fill="none" stroke="currentColor" stroke-width="2.5"/><text x="24" y="27.5" fill="currentColor" font-family="Arial, sans-serif" font-size="12" font-weight="700" text-anchor="middle">Zalo</text></svg>
-                                    </a>
-                                <?php endif; ?>
-                                <a
-                                    class="tk-product-consultation-social tk-product-consultation-social-messenger"
-                                    href="<?php echo esc_url($messenger_url); ?>"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    aria-label="<?php echo esc_attr(tk_home_text('Chat với Tuấn Khang qua Facebook Messenger, mở trong tab mới', 'Chat with Tuan Khang on Facebook Messenger, opens in a new tab')); ?>"
-                                    data-tooltip="<?php echo esc_attr(tk_home_text('Chat Facebook', 'Chat on Facebook')); ?>"
-                                    data-tk-event="tk_product_cta_click"
-                                    data-tk-action="facebook_chat"
-                                    data-tk-placement="final"
-                                >
-                                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M12 2C6.48 2 2 6.15 2 11.27c0 2.91 1.45 5.5 3.72 7.2V22l3.4-1.87c.91.25 1.88.39 2.88.39 5.52 0 10-4.15 10-9.25S17.52 2 12 2Zm.99 12.48-2.55-2.72-4.98 2.72 5.48-5.82 2.62 2.72 4.91-2.72-5.48 5.82Z"/></svg>
-                                </a>
-                            </div>
-                        </div>
+                        <?php get_template_part('template-parts/product/consultation-actions', null, array(
+                            'label' => tk_home_text('Trao đổi với chuyên gia', 'Speak with an expert'),
+                            'source' => 'final',
+                            'hotline' => $hotline,
+                        )); ?>
                         <?php if ($hotline) : ?>
                             <a class="tk-product-hotline" href="tel:<?php echo esc_attr($phone); ?>" data-tk-event="tk_product_cta_click" data-tk-action="hotline" data-tk-placement="final">
                                 <span class="tk-product-hotline-icon" aria-hidden="true">
@@ -529,47 +481,6 @@ $section_nav[] = array('id' => 'product-consultation', 'label' => tk_home_text('
     </dialog>
 <?php endif; ?>
 
-<dialog class="tk-product-dialog" data-product-modal aria-labelledby="product-form-title">
-    <section data-product-modal-panel>
-        <div class="tk-product-dialog-header">
-            <div>
-                <p><?php echo esc_html(tk_home_text('Tư vấn sản phẩm', 'Product consultation')); ?></p>
-                <h2 id="product-form-title"><?php echo esc_html(tk_home_text('Trao đổi với chuyên gia Tuấn Khang', 'Speak with a Tuan Khang expert')); ?></h2>
-            </div>
-            <button type="button" data-product-modal-close aria-label="<?php echo esc_attr(tk_home_text('Đóng biểu mẫu', 'Close form')); ?>">
-                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 6 6 18M6 6l12 12"/></svg>
-            </button>
-        </div>
-        <p class="tk-product-dialog-intro"><?php echo esc_html(tk_home_text('Để lại thông tin, đội ngũ của chúng tôi sẽ liên hệ và tư vấn theo nhu cầu thực tế của bạn.', 'Leave your details and our team will contact you with advice tailored to your needs.')); ?></p>
-        <div class="tk-product-form" data-product-form-host></div>
-        <template data-product-form-template>
-            <?php echo shortcode_exists('contact-form-7') ? do_shortcode('[contact-form-7 id="14"]') : '<p>' . esc_html(tk_home_text('Biểu mẫu hiện chưa khả dụng.', 'The form is currently unavailable.')) . '</p>'; ?>
-        </template>
-    </section>
-</dialog>
-
-<div
-    class="tk-product-mobile-bar"
-    aria-label="<?php echo esc_attr(tk_home_text('Liên hệ nhanh', 'Quick contact')); ?>"
-    data-product-mobile-bar
->
-    <button
-        type="button"
-        data-product-modal-open
-        data-cta-source="mobile-sticky"
-        data-tk-event="tk_product_cta_click"
-        data-tk-action="consultation"
-        data-tk-placement="mobile-sticky"
-    >
-        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"/><path d="m22 6-10 7L2 6"/></svg>
-        <span><?php echo esc_html(tk_home_text('Tư vấn', 'Consult')); ?></span>
-    </button>
-    <?php if ($phone) : ?>
-        <a href="tel:<?php echo esc_attr($phone); ?>" rel="nofollow" data-tk-event="tk_product_cta_click" data-tk-action="hotline" data-tk-placement="mobile-sticky">
-            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.69 2.8a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.33 1.85.56 2.81.69A2 2 0 0 1 22 16.92Z"/></svg>
-            <span><?php echo esc_html(tk_home_text('Hotline', 'Hotline')); ?></span>
-        </a>
-    <?php endif; ?>
-</div>
+<?php get_template_part('template-parts/product/consultation-dialog'); ?>
 
 <?php get_footer(); ?>

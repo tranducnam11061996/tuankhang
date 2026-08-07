@@ -6,15 +6,6 @@
 if (!defined('ABSPATH')) {
     exit;
 }
-function tk_home_copy($key, $vi, $en)
-{
-    $value = tk_home_field($key);
-    if (is_string($value) && trim($value) !== '') {
-        return $value;
-    }
-    return tk_home_text($vi, $en);
-}
-
 function tk_home_render_cta($label, $url, $variant = 'primary', $extra_classes = '')
 {
     if (!$label || !$url) {
@@ -53,4 +44,70 @@ function tk_home_icon($name)
     );
     $paths = $icons[$name] ?? $icons['portfolio'];
     return '<svg class="size-7" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">' . $paths . '</svg>';
+}
+
+function tk_home_query_cards($query_args, $limit)
+{
+    $query_args = array_merge(array(
+        'post_status' => 'publish',
+        'posts_per_page' => max($limit * 3, $limit),
+        'no_found_rows' => true,
+        'ignore_sticky_posts' => true,
+    ), $query_args);
+    $query = new WP_Query($query_args);
+    $items = array();
+
+    foreach ($query->posts as $post) {
+        $post_id = $post instanceof WP_Post ? $post->ID : absint($post);
+        $image_id = get_post_thumbnail_id($post_id);
+        if (!$post_id || !$image_id) {
+            continue;
+        }
+        $items[] = array(
+            'post_id' => $post_id,
+            'image' => $image_id,
+            'title' => get_the_title($post_id),
+            'link' => get_permalink($post_id),
+        );
+        if (count($items) >= $limit) {
+            break;
+        }
+    }
+    return $items;
+}
+
+function tk_home_featured_products()
+{
+    $ids = function_exists('tk_product_featured_ids') ? tk_product_featured_ids() : array();
+    if (!$ids) {
+        return array();
+    }
+    return tk_home_query_cards(array(
+        'post_type' => 'san-pham',
+        'post__in' => array_map('intval', $ids),
+        'orderby' => 'post__in',
+    ), 4);
+}
+
+function tk_home_implant_systems()
+{
+    return tk_home_query_cards(array(
+        'post_type' => 'san-pham',
+        'orderby' => array('menu_order' => 'ASC', 'date' => 'DESC', 'ID' => 'DESC'),
+        'tax_query' => array(array(
+            'taxonomy' => 'danh-muc',
+            'field' => 'slug',
+            'terms' => array('implant'),
+            'include_children' => true,
+        )),
+    ), 4);
+}
+
+function tk_home_latest_news()
+{
+    return tk_home_query_cards(array(
+        'post_type' => 'post',
+        'category_name' => 'tin-tuc',
+        'orderby' => array('date' => 'DESC', 'ID' => 'DESC'),
+    ), 3);
 }

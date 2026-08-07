@@ -3,9 +3,8 @@
 if (!defined('ABSPATH')) exit;
 
 function tk_site_text($vi, $en) { return tk_home_text($vi, $en); }
-function tk_site_field($key, $default = '') { return tk_home_field($key, $default); }
 function tk_site_logo($white = false) { return tk_home_logo($white); }
-function tk_site_menu_tree($menu_id) { return tk_home_menu_tree($menu_id); }
+function tk_site_menu_tree($menu_id = 0) { return tk_home_menu_tree($menu_id ?: tk_theme_menu_id('primary')); }
 function tk_site_desktop_menu($nodes) { tk_home_desktop_menu($nodes); }
 function tk_site_mobile_menu($nodes) { tk_home_mobile_menu($nodes); }
 
@@ -116,7 +115,7 @@ function tk_content_page_links($group)
     $groups = array('company' => array(63, 1340, 1342, 1344), 'services' => array(196, 198), 'policies' => array(76, 71, 78, 73, 502), 'contact' => array(63, 1340, 1342, 1344, 65));
     $links = array();
     foreach ($groups[$group] ?? array() as $id) if (get_post_status($id) === 'publish') $links[] = array('label' => get_the_title($id), 'url' => get_permalink($id), 'active' => is_page($id));
-    if (!$links) foreach (tk_site_menu_tree(25) as $node) $links[] = array('label' => $node['item']->title, 'url' => $node['item']->url, 'active' => false);
+    if (!$links) foreach (tk_site_menu_tree() as $node) $links[] = array('label' => $node['item']->title, 'url' => $node['item']->url, 'active' => false);
     return $links;
 }
 
@@ -448,7 +447,8 @@ function tk_content_sidebar($instance = 'desktop', $toc_items = array(), $detail
             </div>
         </section>
         <?php if ($group === 'contact') : ?>
-            <section class="mt-6 rounded-xl bg-slate-50 p-4" aria-labelledby="<?php echo esc_attr($instance); ?>-quick-contact-title"><h2 id="<?php echo esc_attr($instance); ?>-quick-contact-title" class="font-bold uppercase text-primary"><?php echo esc_html(tk_site_text('Liên hệ nhanh', 'Quick contact')); ?></h2><p class="mt-3"><a class="font-bold text-content-accent hover:underline" href="tel:<?php echo esc_attr(preg_replace('/[^0-9+]/', '', (string) tk_site_field('wpcf-so-hotline'))); ?>"><?php echo esc_html((string) tk_site_field('wpcf-so-hotline')); ?></a></p><p class="mt-2 break-all"><a class="text-primary hover:underline" href="mailto:<?php echo esc_attr((string) tk_site_field('wpcf-email')); ?>"><?php echo esc_html((string) tk_site_field('wpcf-email')); ?></a></p></section>
+            <?php $quick_hotline = (string) tk_site_option('contact.hotline'); $quick_email = (string) tk_site_option('contact.email'); ?>
+            <section class="mt-6 rounded-xl bg-slate-50 p-4" aria-labelledby="<?php echo esc_attr($instance); ?>-quick-contact-title"><h2 id="<?php echo esc_attr($instance); ?>-quick-contact-title" class="font-bold uppercase text-primary"><?php echo esc_html(tk_site_text('Liên hệ nhanh', 'Quick contact')); ?></h2><p class="mt-3"><a class="font-bold text-content-accent hover:underline" href="tel:<?php echo esc_attr(tk_theme_phone_uri($quick_hotline)); ?>"><?php echo esc_html($quick_hotline); ?></a></p><p class="mt-2 break-all"><a class="text-primary hover:underline" href="mailto:<?php echo esc_attr($quick_email); ?>"><?php echo esc_html($quick_email); ?></a></p></section>
         <?php else : ?>
             <section class="mt-6" aria-labelledby="<?php echo esc_attr($instance); ?>-recent-title"><h2 id="<?php echo esc_attr($instance); ?>-recent-title" class="bg-primary px-4 py-3 text-base font-bold uppercase text-white"><?php echo esc_html(tk_site_text('Bài viết mới', 'Recent posts')); ?></h2><div class="px-1"><?php foreach (tk_content_recent_post_ids() as $recent_id) tk_content_compact_post($recent_id); ?></div></section>
         <?php endif; ?>
@@ -459,11 +459,11 @@ function tk_content_sidebar($instance = 'desktop', $toc_items = array(), $detail
 function tk_content_sidebar_button($toc_items = array(), $detail = false)
 {
     if ($detail) {
-        $label = count($toc_items) >= 2 ? tk_site_text('Mục lục & điều hướng', 'Contents & navigation') : tk_site_text('Điều hướng nội dung', 'Content navigation');
+        $label = count($toc_items) >= 2 ? tk_site_text('Mục lục', 'Contents & navigation') : tk_site_text('Mục lục', 'Content navigation');
         echo '<button type="button" data-context-filter-open aria-controls="context-filter-drawer" aria-expanded="false" class="tk-reading-drawer-button"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M4 12h10M4 18h16"/><path d="M18 10l2 2-2 2"/></svg><span>' . esc_html($label) . '</span><span aria-hidden="true">→</span></button>';
         return;
     }
-    echo '<button type="button" data-context-filter-open aria-controls="context-filter-drawer" aria-expanded="false" class="mb-6 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 font-bold uppercase text-white lg:hidden"><svg class="size-5" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M7 12h10M10 18h4"/></svg>' . esc_html(tk_site_text('Điều hướng nội dung', 'Content navigation')) . '</button>';
+    echo '<button type="button" data-context-filter-open aria-controls="context-filter-drawer" aria-expanded="false" class="mb-6 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 font-bold uppercase text-white lg:hidden"><svg class="size-5" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M7 12h10M10 18h4"/></svg>' . esc_html(tk_site_text('Mục lục', 'Content navigation')) . '</button>';
 }
 
 function tk_content_sidebar_drawer($toc_items = array(), $detail = false)
@@ -471,8 +471,8 @@ function tk_content_sidebar_drawer($toc_items = array(), $detail = false)
     if ($detail) {
         ?>
         <div data-context-filter-overlay class="tk-context-filter-overlay tk-reading-drawer-overlay"></div>
-        <aside id="context-filter-drawer" data-context-filter-drawer aria-hidden="true" inert class="tk-context-filter-drawer tk-reading-drawer" aria-label="<?php echo esc_attr(tk_site_text('Mục lục và điều hướng nội dung', 'Contents and navigation')); ?>">
-            <div class="tk-reading-drawer-head"><div><span>TK / CONTENT</span><h2><?php echo esc_html(tk_site_text('Điều hướng', 'Navigation')); ?></h2></div><button type="button" data-context-filter-close aria-label="<?php echo esc_attr(tk_site_text('Đóng điều hướng', 'Close navigation')); ?>"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+        <aside id="context-filter-drawer" data-context-filter-drawer aria-hidden="true" inert class="tk-context-filter-drawer tk-reading-drawer" aria-label="<?php echo esc_attr(tk_site_text('Mục lục và mục lục nội dung', 'Contents and navigation')); ?>">
+            <div class="tk-reading-drawer-head"><div><span>TUẤN KHANG</span><h2><?php echo esc_html(tk_site_text('Mục Lục', 'Navigation')); ?></h2></div><button type="button" data-context-filter-close aria-label="<?php echo esc_attr(tk_site_text('Đóng mục lục', 'Close navigation')); ?>"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
             <?php tk_content_sidebar('mobile', $toc_items, true); ?>
         </aside>
         <?php
@@ -480,8 +480,8 @@ function tk_content_sidebar_drawer($toc_items = array(), $detail = false)
     }
     ?>
     <div data-context-filter-overlay class="tk-context-filter-overlay fixed inset-0 z-50 bg-slate-950/55 lg:hidden"></div>
-    <aside id="context-filter-drawer" data-context-filter-drawer aria-hidden="true" inert class="tk-context-filter-drawer fixed inset-y-0 left-0 z-[60] w-[min(90vw,380px)] overflow-y-auto bg-white p-5 shadow-2xl lg:hidden" aria-label="<?php echo esc_attr(tk_site_text('Điều hướng nội dung', 'Content navigation')); ?>">
-        <div class="mb-5 flex items-center justify-between border-b border-slate-200 pb-4"><h2 class="text-lg font-bold uppercase text-primary"><?php echo esc_html(tk_site_text('Điều hướng', 'Navigation')); ?></h2><button type="button" data-context-filter-close class="flex size-11 items-center justify-center rounded-lg text-primary" aria-label="<?php echo esc_attr(tk_site_text('Đóng điều hướng', 'Close navigation')); ?>"><svg class="size-7" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+    <aside id="context-filter-drawer" data-context-filter-drawer aria-hidden="true" inert class="tk-context-filter-drawer fixed inset-y-0 left-0 z-[60] w-[min(90vw,380px)] overflow-y-auto bg-white p-5 shadow-2xl lg:hidden" aria-label="<?php echo esc_attr(tk_site_text('Mục lụcnội dung', 'Content navigation')); ?>">
+        <div class="mb-5 flex items-center justify-between border-b border-slate-200 pb-4"><h2 class="text-lg font-bold uppercase text-primary"><?php echo esc_html(tk_site_text('Điều hướng', 'Navigation')); ?></h2><button type="button" data-context-filter-close class="flex size-11 items-center justify-center rounded-lg text-primary" aria-label="<?php echo esc_attr(tk_site_text('Đóng mục lục', 'Close navigation')); ?>"><svg class="size-7" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
         <?php tk_content_sidebar('mobile'); ?>
     </aside>
     <?php
@@ -493,8 +493,9 @@ function tk_content_render_endcap($context)
     $group = $context['group'] ?? 'general';
     if (!$is_post && !in_array($group, array('policies', 'services'), true)) return;
 
-    $hotline = (string) tk_site_field('wpcf-so-hotline');
-    $email = (string) tk_site_field('wpcf-email');
+    $hotline = (string) tk_site_option('contact.hotline');
+    $email = (string) tk_site_option('contact.email');
+    $consultation_url = (string) tk_site_option('contact.consultation_url', home_url('/lien-he/'));
     $title = $is_post ? tk_site_text('Trao đổi cùng đội ngũ chuyên môn', 'Talk with our professional team') : tk_site_text('Bạn cần hỗ trợ thêm?', 'Need more support?');
     $description = $is_post
         ? tk_site_text('Tuấn Khang sẵn sàng đồng hành cùng bác sĩ và phòng khám trong quá trình lựa chọn giải pháp phù hợp.', 'Tuan Khang supports dentists and clinics in selecting the right solutions.')
@@ -507,7 +508,7 @@ function tk_content_render_endcap($context)
             <span><?php echo esc_html($description); ?></span>
         </div>
         <div class="tk-content-endcap-actions">
-            <a class="tk-content-endcap-primary" href="<?php echo esc_url(home_url('/lien-he/')); ?>"><span><?php echo esc_html(tk_site_text('Liên hệ Tuấn Khang', 'Contact Tuan Khang')); ?></span><span aria-hidden="true">→</span></a>
+            <a class="tk-content-endcap-primary" href="<?php echo esc_url($consultation_url); ?>"><span><?php echo esc_html(tk_site_text('Liên hệ Tuấn Khang', 'Contact Tuan Khang')); ?></span><span aria-hidden="true">→</span></a>
             <?php if ($hotline) : ?><a class="tk-content-endcap-secondary" href="tel:<?php echo esc_attr(preg_replace('/[^0-9+]/', '', $hotline)); ?>"><small>Hotline</small><strong><?php echo esc_html($hotline); ?></strong></a><?php elseif ($email) : ?><a class="tk-content-endcap-secondary" href="mailto:<?php echo esc_attr($email); ?>"><small>Email</small><strong><?php echo esc_html($email); ?></strong></a><?php endif; ?>
         </div>
     </section>

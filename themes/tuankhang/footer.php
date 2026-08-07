@@ -1,16 +1,23 @@
 <?php
-$hotline = (string) tk_site_field('wpcf-so-hotline');
-$email = (string) tk_site_field('wpcf-email');
-$consultation_url = home_url('/lien-he/');
-$company_name = tk_site_text('Công ty TNHH Dược và Thiết bị y tế Tuấn Khang', 'Tuan Khang Pharmaceutical and Medical Equipment Co., Ltd.');
-$footer_menu = wp_get_nav_menu_items(29);
+$hotline = (string) tk_site_option('contact.hotline');
+$email = (string) tk_site_option('contact.email');
+$consultation_url = (string) tk_site_option('contact.consultation_url', home_url('/lien-he/'));
+$company_name = (string) tk_site_option('brand.company_name', 'Công ty TNHH Dược và Thiết bị y tế Tuấn Khang');
+$footer_menu = wp_get_nav_menu_items(tk_theme_menu_id('footer'));
+$branches = (array) tk_site_option('branches', array());
+$map_embed_url = (string) tk_site_option('map_embed_url');
+$certificate_url = (string) tk_site_option('integrations.certificate_url');
+$certificate_image_url = tk_theme_attachment_url(absint(tk_site_option('integrations.certificate_image_id')), 'https://tuankhangmedical.com/wp-content/uploads/2021/08/bct.png');
+$messenger_url = (string) tk_site_option('social.messenger_url');
 $transparent_pixel = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
 $socials = array(
-    array('field' => 'wpcf-link-fanpage', 'label' => 'Facebook', 'icon' => 'icon-1.png'),
-    array('field' => 'wpcf-link-twitter', 'label' => 'Twitter', 'icon' => 'icon-2.png'),
-    array('field' => 'wpcf-link-google-plus', 'label' => 'Google', 'icon' => 'icon-3.png'),
-    array('field' => 'wpcf-link-instagram', 'label' => 'Instagram', 'icon' => 'icon-4.png'),
-    array('field' => 'wpcf-link-kenh-youtube', 'label' => 'YouTube', 'icon' => 'icon-5.png'),
+    array('url' => tk_site_option('social.facebook_url'), 'label' => 'Facebook', 'icon' => 'icon-1.png'),
+    array('url' => tk_site_option('social.x_url'), 'label' => 'X', 'icon' => 'icon-2.png'),
+    array('url' => tk_site_option('social.instagram_url'), 'label' => 'Instagram', 'icon' => 'icon-4.png'),
+    array('url' => tk_site_option('social.youtube_url'), 'label' => 'YouTube', 'icon' => 'icon-5.png'),
+    array('url' => tk_theme_zalo_url(), 'label' => 'Zalo', 'short' => 'Z'),
+    array('url' => tk_site_option('social.linkedin_url'), 'label' => 'LinkedIn', 'short' => 'in'),
+    array('url' => tk_site_option('social.tiktok_url'), 'label' => 'TikTok', 'short' => 'TT'),
 );
 ?>
 <footer id="footer" class="tk-footer text-blue-100">
@@ -28,8 +35,8 @@ $socials = array(
             </div>
 
             <div class="tk-footer-gateway-actions">
-                <a class="tk-footer-primary-cta" href="<?php echo esc_url($consultation_url); ?>">
-                    <span><?php echo esc_html(tk_site_text('Trao đổi cùng Tuấn Khang', 'Talk with Tuan Khang')); ?></span>
+                <a class="tk-footer-primary-cta" href="<?php echo esc_url($consultation_url); ?>" target="_blank">
+                    <span><?php echo esc_html(tk_site_text('Liên hệ với Tuấn Khang', 'Talk with Tuan Khang')); ?></span>
                     <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
                 </a>
                 <?php if ($hotline) : ?>
@@ -43,7 +50,7 @@ $socials = array(
 
         <div class="tk-footer-grid">
             <section class="tk-footer-panel">
-                <h2 class="tk-footer-heading"><?php echo esc_html(tk_site_text('Liên hệ trực tiếp', 'Direct contact')); ?></h2>
+                <h2 class="tk-footer-heading"><?php echo esc_html(tk_site_text('Thông tin liên hệ', 'Direct contact')); ?></h2>
                 <p class="tk-footer-summary"><?php echo esc_html(tk_site_text('Hơn một thập kỷ đồng hành cùng bác sĩ và phòng khám với thiết bị, vật liệu và giải pháp nha khoa được tuyển chọn.', 'More than a decade supporting dentists and clinics with carefully selected equipment, materials, and dental solutions.')); ?></p>
                 <div class="tk-footer-contact-list">
                     <?php if ($hotline) : ?>
@@ -73,15 +80,15 @@ $socials = array(
             <section class="tk-footer-panel">
                 <h2 class="tk-footer-heading"><?php echo esc_html(tk_site_text('Hệ thống chi nhánh', 'Branch network')); ?></h2>
                 <address class="tk-footer-branches">
-                    <p><strong><?php echo esc_html(tk_site_text('Hà Nội', 'Hanoi')); ?></strong><?php echo esc_html(tk_site_text('Số 23, ngõ 38 Phương Mai, Phường Kim Liên, Hà Nội.', 'No. 23, Alley 38 Phuong Mai, Kim Lien Ward, Hanoi.')); ?></p>
-                    <p><strong><?php echo esc_html(tk_site_text('Hồ Chí Minh', 'Ho Chi Minh City')); ?></strong><?php echo esc_html(tk_site_text('Số 1/1 Đường Hoàng Việt, Phường Tân Sơn Nhất, Hồ Chí Minh.', 'No. 1/1 Hoang Viet Street, Tan Son Nhat Ward, Ho Chi Minh City.')); ?></p>
-                    <p><strong><?php echo esc_html(tk_site_text('Trụ sở', 'Head office')); ?></strong><?php echo esc_html(tk_site_field('wpcf-dia-chi-cong-ty')); ?></p>
+                    <?php foreach ($branches as $branch) : if (!is_array($branch) || empty($branch['address'])) continue; ?>
+                        <p><strong><?php echo esc_html((string) ($branch['label'] ?? '')); ?></strong><?php echo esc_html((string) $branch['address']); ?></p>
+                    <?php endforeach; ?>
                 </address>
             </section>
 
             <section data-map-section class="tk-footer-panel tk-footer-map-panel">
                 <h2 class="tk-footer-heading"><?php echo esc_html(tk_site_text('BẢN ĐỒ', 'MAP')); ?></h2>
-                <div class="tk-footer-map-frame"><iframe title="<?php echo esc_attr(tk_site_text('Bản đồ trụ sở Tuấn Khang', 'Tuan Khang office map')); ?>" data-map-src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3724.685746165307!2d105.83404037627878!3d21.005230488584314!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3135ac7919c6b95b%3A0x624a289a6ba5cdc!2zMjMgTmcuIDM4IFAuIFBoxrDGoW5nIE1haSwgS2ltIExpw6puLCDEkOG7kW5nIMSQYSwgSMOgIE7hu5lpLCBWaeG7h3QgTmFt!5e0!3m2!1svi!2s!4v1734943915820!5m2!1svi!2s" loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe></div>
+                <?php if ($map_embed_url) : ?><div class="tk-footer-map-frame"><iframe title="<?php echo esc_attr(tk_site_text('Bản đồ trụ sở Tuấn Khang', 'Tuan Khang office map')); ?>" data-map-src="<?php echo esc_url($map_embed_url); ?>" loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe></div><?php endif; ?>
             </section>
         </div>
 
@@ -89,19 +96,19 @@ $socials = array(
             <div class="tk-footer-social">
                 <h2><?php echo esc_html(tk_site_text('Kết nối với Tuấn Khang', 'Connect with Tuan Khang')); ?></h2>
                 <div class="tk-footer-social-list">
-                    <?php foreach ($socials as $social) : $url = tk_site_field($social['field']); if (!$url) continue; $icon_url = get_theme_file_uri('image/' . $social['icon']); ?>
-                        <a href="<?php echo esc_url($url); ?>" class="tk-social-link" aria-label="<?php echo esc_attr($social['label']); ?>" rel="noopener"><img src="<?php echo esc_attr($transparent_pixel); ?>" data-deferred-src="<?php echo esc_url($icon_url); ?>" width="38" height="38" decoding="async" alt=""><noscript><img src="<?php echo esc_url($icon_url); ?>" width="38" height="38" alt=""></noscript></a>
+                    <?php foreach ($socials as $social) : $url = (string) ($social['url'] ?? ''); if (!$url) continue; ?>
+                        <a href="<?php echo esc_url($url); ?>" class="tk-social-link" aria-label="<?php echo esc_attr($social['label']); ?>" target="_blank" rel="noopener noreferrer"><?php if (!empty($social['icon'])) : $icon_url = get_theme_file_uri('image/' . $social['icon']); ?><img src="<?php echo esc_attr($transparent_pixel); ?>" data-deferred-src="<?php echo esc_url($icon_url); ?>" width="38" height="38" decoding="async" alt=""><noscript><img src="<?php echo esc_url($icon_url); ?>" width="38" height="38" alt=""></noscript><?php else : ?><span class="tk-social-short" aria-hidden="true"><?php echo esc_html($social['short']); ?></span><?php endif; ?></a>
                     <?php endforeach; ?>
                 </div>
             </div>
-            <a class="tk-footer-cert" rel="nofollow noopener" target="_blank" href="http://online.gov.vn/Home/WebDetails/84000" title="<?php echo esc_attr(tk_site_text('Đã thông báo với Bộ Công Thương', 'Registered with Ministry of Industry and Trade')); ?>"><img src="https://tuankhangmedical.com/wp-content/uploads/2021/08/bct.png" width="160" height="60" loading="lazy" decoding="async" alt="<?php echo esc_attr(tk_site_text('Đã thông báo với Bộ Công Thương', 'Registered with Ministry of Industry and Trade')); ?>"></a>
+            <?php if ($certificate_url && $certificate_image_url) : ?><a class="tk-footer-cert" rel="nofollow noopener" target="_blank" href="<?php echo esc_url($certificate_url); ?>" title="<?php echo esc_attr(tk_site_text('Đã thông báo với Bộ Công Thương', 'Registered with Ministry of Industry and Trade')); ?>"><img src="<?php echo esc_url($certificate_image_url); ?>" width="160" height="60" loading="lazy" decoding="async" alt="<?php echo esc_attr(tk_site_text('Đã thông báo với Bộ Công Thương', 'Registered with Ministry of Industry and Trade')); ?>"></a><?php endif; ?>
             <p class="tk-footer-copyright">© <?php echo esc_html(date('Y')); ?> TUẤN KHANG.<br><?php echo esc_html(tk_site_text('Bảo lưu mọi quyền.', 'All rights reserved.')); ?></p>
         </div>
     </div>
 </footer>
 
 <?php if ($hotline && !is_singular('san-pham')) : ?><a class="tk-floating-call fixed bottom-5 left-5 z-40 flex size-14 items-center justify-center rounded-full bg-action text-white shadow-xl lg:hidden" href="tel:<?php echo esc_attr(preg_replace('/[^0-9+]/', '', $hotline)); ?>" aria-label="<?php echo esc_attr(tk_site_text('Gọi hotline', 'Call hotline')); ?>"><svg class="size-6" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.13.96.36 1.9.69 2.8a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.33 1.85.56 2.81.69A2 2 0 0122 16.92z"/></svg></a><?php endif; ?>
-<a class="tk-floating-messenger" href="https://m.me/108890274790969" target="_blank" rel="noopener noreferrer" aria-label="<?php echo esc_attr(tk_site_text('Nhắn tin cho Tuấn Khang qua Messenger', 'Message Tuan Khang on Messenger')); ?>"><svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.15 2 11.27c0 2.91 1.45 5.5 3.72 7.2V22l3.4-1.87c.91.25 1.88.39 2.88.39 5.52 0 10-4.15 10-9.25S17.52 2 12 2zm.99 12.48l-2.55-2.72-4.98 2.72 5.48-5.82 2.62 2.72 4.91-2.72-5.48 5.82z"/></svg></a>
+<?php if ($messenger_url) : ?><a class="tk-floating-messenger" href="<?php echo esc_url($messenger_url); ?>" target="_blank" rel="noopener noreferrer" aria-label="<?php echo esc_attr(tk_site_text('Nhắn tin cho Tuấn Khang qua Messenger', 'Message Tuan Khang on Messenger')); ?>"><svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.15 2 11.27c0 2.91 1.45 5.5 3.72 7.2V22l3.4-1.87c.91.25 1.88.39 2.88.39 5.52 0 10-4.15 10-9.25S17.52 2 12 2zm.99 12.48l-2.55-2.72-4.98 2.72 5.48-5.82 2.62 2.72 4.91-2.72-5.48 5.82z"/></svg></a><?php endif; ?>
 <?php wp_footer(); ?>
 </body>
 </html>

@@ -8,11 +8,11 @@
 <body <?php body_class('tk-tailwind'); ?>>
 <?php wp_body_open(); ?>
 <?php
-$site_menu = tk_site_menu_tree(25);
-$hotline = (string) tk_site_field('wpcf-so-hotline');
-$email = (string) tk_site_field('wpcf-email');
-$company_name = tk_site_text('Công ty TNHH Dược và Thiết bị y tế Tuấn Khang', 'Tuan Khang Pharmaceutical and Medical Equipment Co., Ltd.');
-$consultation_url = home_url('/lien-he/');
+$site_menu = tk_site_menu_tree();
+$hotline = (string) tk_site_option('contact.hotline');
+$email = (string) tk_site_option('contact.email');
+$company_name = (string) tk_site_option('brand.company_name', 'Công ty TNHH Dược và Thiết bị y tế Tuấn Khang');
+$consultation_url = (string) tk_site_option('contact.consultation_url', home_url('/lien-he/'));
 ?>
 <a href="#main-content" class="sr-only z-[100] rounded bg-white px-4 py-3 text-primary focus:not-sr-only focus:fixed focus:left-3 focus:top-3">
     <?php echo esc_html(tk_site_text('Bỏ qua đến nội dung', 'Skip to content')); ?>

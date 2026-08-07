@@ -39,6 +39,11 @@ if (!function_exists('tuankhang_setup')) :
          */
         add_theme_support('post-thumbnails');
 
+        register_nav_menus(array(
+            'primary' => __('Menu chính', 'tuankhang'),
+            'footer' => __('Menu footer', 'tuankhang'),
+        ));
+
 
         /*
          * Switch default core markup for search form, comment form, and comments
@@ -55,6 +60,10 @@ if (!function_exists('tuankhang_setup')) :
 endif;
 add_action('after_setup_theme', 'tuankhang_setup');
 
+require_once get_theme_file_path('/inc/theme-options/schema.php');
+require_once get_theme_file_path('/inc/theme-options/runtime.php');
+require_once get_theme_file_path('/inc/theme-options/migration.php');
+require_once get_theme_file_path('/inc/theme-options/admin.php');
 require_once get_theme_file_path('/inc/home-tailwind.php');
 require_once get_theme_file_path('/inc/home-components.php');
 require_once get_theme_file_path('/inc/content-tailwind.php');
@@ -155,7 +164,7 @@ function tuankhang_prune_tailwind_assets()
 
     $style_handles = array('contact-form-7', 'wp-pagenavi');
     $script_handles = array('jquery', 'jquery-core', 'jquery-migrate');
-    if (!is_singular('san-pham')) {
+    if (!is_singular('san-pham') && !is_tax('danh-muc')) {
         $script_handles = array_merge($script_handles, array('contact-form-7', 'wpcf7-recaptcha'));
     }
     foreach ($style_handles as $handle) {

@@ -13,6 +13,9 @@ $sort = tk_product_current_sort();
 $search_query = get_search_query();
 $top_category_count = count(tk_home_menu_tree(24));
 $clear_url = is_tax('danh-muc') ? tk_product_listing_base_url() : (get_post_type_archive_link('san-pham') ?: home_url('/san-pham/'));
+$is_category_listing = is_tax('danh-muc');
+$hotline = $is_category_listing ? (string) tk_site_option('contact.hotline') : '';
+$dialog_style_url = $is_category_listing ? tk_product_dialog_style_url() : '';
 $sort_options = array(
     'default' => tk_home_text('Sắp xếp mặc định', 'Default order'),
     'title_asc' => tk_home_text('Tên: A–Z', 'Name: A–Z'),
@@ -22,7 +25,7 @@ $sort_options = array(
 
 get_header();
 ?>
-<main id="main-content" class="tk-product-listing" data-product-catalog>
+<main id="main-content" class="tk-product-listing" data-product-catalog<?php if ($dialog_style_url) : ?> data-product-dialog-style="<?php echo esc_url($dialog_style_url); ?>"<?php endif; ?>>
     <section class="tk-catalog-hero">
         <div class="tk-catalog-grid-pattern" aria-hidden="true"></div>
         <div class="tk-container tk-catalog-hero-grid">
@@ -42,12 +45,22 @@ get_header();
                 <p class="tk-catalog-hero-description"><?php echo esc_html($context['description']); ?></p>
                 <div class="tk-catalog-hero-actions">
                     <a class="tk-catalog-button tk-catalog-button--primary" href="#product-catalog"><?php echo esc_html(tk_home_text('Khám phá danh mục', 'Explore catalogue')); ?><svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 10h12M11 5l5 5-5 5"/></svg></a>
-                    <a class="tk-catalog-button tk-catalog-button--secondary" href="<?php echo esc_url(home_url('/lien-he/')); ?>"><?php echo esc_html(tk_home_text('Tư vấn giải pháp', 'Solution consultation')); ?></a>
+                    <?php if ($is_category_listing) : ?>
+                        <div class="tk-catalog-consultation-actions">
+                            <?php get_template_part('template-parts/product/consultation-actions', null, array(
+                                'label' => tk_home_text('Tư vấn giải pháp', 'Solution consultation'),
+                                'source' => 'catalog-hero',
+                                'hotline' => $hotline,
+                            )); ?>
+                        </div>
+                    <?php else : ?>
+                        <a class="tk-catalog-button tk-catalog-button--secondary" href="<?php echo esc_url((string) tk_site_option('contact.consultation_url', home_url('/lien-he/'))); ?>"><?php echo esc_html(tk_home_text('Tư vấn giải pháp', 'Solution consultation')); ?></a>
+                    <?php endif; ?>
                 </div>
                 <dl class="tk-catalog-hero-stats">
                     <div><dt><?php echo esc_html(number_format_i18n((int) $context['found'])); ?></dt><dd><?php echo esc_html(tk_home_text('Sản phẩm chuyên môn', 'Professional products')); ?></dd></div>
                     <div><dt><?php echo esc_html(number_format_i18n($top_category_count)); ?></dt><dd><?php echo esc_html(tk_home_text('Nhóm giải pháp', 'Solution groups')); ?></dd></div>
-                    <div><dt>01:01</dt><dd><?php echo esc_html(tk_home_text('Hỗ trợ chuyên môn', 'Specialist support')); ?></dd></div>
+                    <div><dt>24 / 7</dt><dd><?php echo esc_html(tk_home_text('Hỗ trợ chuyên môn', 'Specialist support')); ?></dd></div>
                 </dl>
             </div>
 
@@ -78,7 +91,7 @@ get_header();
                 <div class="tk-catalog-toolbar-heading">
                     <p><?php echo esc_html(tk_home_text('Hệ sinh thái sản phẩm', 'Product ecosystem')); ?></p>
                     <h2 id="tk-catalog-results-title"><?php echo esc_html($title); ?></h2>
-                    <span><?php echo esc_html(sprintf(tk_home_text('%s kết quả', '%s results'), number_format_i18n((int) $context['found']))); ?></span>
+                    <span><?php echo esc_html(sprintf(tk_home_text('%s sản phẩm', '%s results'), number_format_i18n((int) $context['found']))); ?></span>
                 </div>
                 <form class="tk-catalog-search" action="<?php echo esc_url(tk_product_listing_base_url()); ?>" method="get" role="search">
                     <input type="hidden" name="post_type" value="san-pham">
@@ -139,5 +152,9 @@ get_header();
     </div>
     <?php tk_product_sidebar('mobile'); ?>
 </aside>
+
+<?php if ($is_category_listing) : ?>
+    <?php get_template_part('template-parts/product/consultation-dialog'); ?>
+<?php endif; ?>
 
 <?php get_footer(); ?>
