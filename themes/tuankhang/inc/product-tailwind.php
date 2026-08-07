@@ -492,7 +492,7 @@ function tk_product_sidebar($instance = 'desktop')
         <div class="tk-catalog-consult">
             <span class="tk-catalog-consult-icon" aria-hidden="true">TK</span>
             <div><strong><?php echo esc_html(tk_home_text('Cần tư vấn cấu hình?', 'Need configuration advice?')); ?></strong><p><?php echo esc_html(tk_home_text('Đội ngũ chuyên môn sẵn sàng hỗ trợ.', 'Our specialists are ready to help.')); ?></p></div>
-            <a href="<?php echo esc_url(home_url('/lien-he/')); ?>" aria-label="<?php echo esc_attr(tk_home_text('Liên hệ tư vấn', 'Contact for advice')); ?>"><svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 10h12M11 5l5 5-5 5"/></svg></a>
+            <a href="<?php echo esc_url((string) tk_site_option('contact.consultation_url', home_url('/lien-he/'))); ?>" aria-label="<?php echo esc_attr(tk_home_text('Liên hệ tư vấn', 'Contact for advice')); ?>"><svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 10h12M11 5l5 5-5 5"/></svg></a>
         </div>
     </div>
     <?php
@@ -1012,6 +1012,15 @@ function tk_product_normalize_rich_content($post_id)
     }
 
     return wp_kses_post($content);
+}
+
+function tk_product_dialog_style_url()
+{
+    $path = get_theme_file_path('/assets/dist/product-dialogs.min.css');
+
+    return is_file($path)
+        ? add_query_arg('ver', (string) filemtime($path), get_theme_file_uri('/assets/dist/product-dialogs.min.css'))
+        : '';
 }
 
 function tk_product_preload_hero()

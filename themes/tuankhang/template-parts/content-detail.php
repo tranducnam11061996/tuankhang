@@ -15,7 +15,7 @@ $is_post = ($context['kind'] ?? '') === 'post';
         <div class="tk-container">
             <?php tk_content_sidebar_button($toc_items, true); ?>
             <div class="tk-content-detail-layout">
-                <aside class="tk-content-detail-rail" aria-label="<?php echo esc_attr($is_post ? tk_site_text('Chuyên mục và mục lục bài viết', 'Categories and article contents') : tk_site_text('Điều hướng và mục lục nội dung', 'Navigation and contents')); ?>">
+                <aside class="tk-content-detail-rail" aria-label="<?php echo esc_attr($is_post ? tk_site_text('Chuyên mục và mục lục bài viết', 'Categories and article contents') : tk_site_text('Mục lục nội dung', 'Navigation and contents')); ?>">
                     <?php tk_content_sidebar('desktop', $toc_items, true); ?>
                 </aside>
 
@@ -28,7 +28,7 @@ $is_post = ($context['kind'] ?? '') === 'post';
 
             <?php if ($is_post) : $related_ids = tk_content_related_post_ids($post_id); if ($related_ids) : ?>
                 <section class="tk-content-related" aria-labelledby="related-posts-heading">
-                    <div class="tk-content-related-head"><div><p><?php echo esc_html(tk_site_text('ĐỌC TIẾP / TUẤN KHANG JOURNAL', 'CONTINUE / TUAN KHANG JOURNAL')); ?></p><h2 id="related-posts-heading"><?php echo esc_html(tk_site_text('Các bài đăng khác', 'Related posts')); ?></h2></div><span><?php echo esc_html(sprintf('%02d', count($related_ids))); ?></span></div>
+                    <div class="tk-content-related-head"><div><p><?php echo esc_html(tk_site_text('ĐỌC TIẾP / TUẤN KHANG JOURNAL', 'CONTINUE / TUAN KHANG JOURNAL')); ?></p><h2 id="related-posts-heading"><?php echo esc_html(tk_site_text('Các bài đăng khác', 'Related posts')); ?></h2></div></div>
                     <div class="tk-content-related-grid"><?php foreach ($related_ids as $related_id) tk_content_post_card($related_id, true); ?></div>
                 </section>
             <?php endif; endif; ?>

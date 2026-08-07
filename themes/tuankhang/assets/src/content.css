@@ -283,6 +283,15 @@ body.tk-context-filter-open .tk-context-filter-overlay { opacity: 1; visibility:
 .tk-content-detail .tk-article-content > p:has(> img[class*="wp-image-"]:only-child) { margin-block: 2rem; }
 .tk-content-detail .tk-article-content picture { display: block; }
 .tk-content-detail .tk-article-content img { border-radius: .85rem; box-shadow: 0 16px 38px rgb(1 57 116 / 12%); }
+.tk-content-detail .tk-article-content img[src*="static.xx.fbcdn.net/images/emoji.php"] {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  margin: 0 .35em 0 0;
+  border-radius: 0;
+  box-shadow: none;
+  vertical-align: -.1em;
+}
 .tk-content-detail .tk-article-content figcaption { color: #617d8f; font-size: .78rem; line-height: 1.55; }
 .tk-content-detail .tk-article-content table { margin-block: 1.75rem; border: 1px solid #c9dfeb; border-radius: .75rem; background: #fff; }
 .tk-content-detail .tk-article-content th { color: #fff; background: #0b3156; }

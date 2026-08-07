@@ -14,7 +14,7 @@
   if (catalogPage && !reducedMotion.matches) catalogPage.classList.add('has-catalog-reveal');
   let dialogStylesPromise = null;
   const ensureDialogStyles = () => {
-    const source = productPage?.dataset.productDialogStyle;
+    const source = document.querySelector('[data-product-dialog-style]')?.dataset.productDialogStyle;
     if (dialogStylesPromise) return dialogStylesPromise;
     if (!source || document.querySelector('link[data-product-dialog-styles]')) return Promise.resolve();
     dialogStylesPromise = new Promise((resolve) => {
@@ -31,7 +31,7 @@
 
   const productHero = document.querySelector('[data-product-hero]');
   const mobileBar = document.querySelector('[data-product-mobile-bar]');
-  if (productHero) {
+  if (productHero && mobileBar) {
     new IntersectionObserver(([entry]) => {
       mobileBar.classList.toggle('is-visible', !entry.isIntersecting);
     }).observe(productHero);
@@ -285,7 +285,18 @@
   modal?.addEventListener('click', (event) => {
     if (event.target === modal) closeModal();
   });
-  modal?.addEventListener('keydown', (event) => trapFocus(modal, event));
+  modal?.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      closeModal();
+      return;
+    }
+    trapFocus(modal, event);
+  });
+  modal?.addEventListener('cancel', (event) => {
+    event.preventDefault();
+    closeModal();
+  });
   modal?.addEventListener('close', () => {
     document.body.classList.remove('tk-product-dialog-open');
     modalLastFocus?.focus();
@@ -336,7 +347,18 @@
   imageDialog?.addEventListener('click', (event) => {
     if (event.target === imageDialog) closeImageDialog();
   });
-  imageDialog?.addEventListener('keydown', (event) => trapFocus(imageDialog, event));
+  imageDialog?.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      closeImageDialog();
+      return;
+    }
+    trapFocus(imageDialog, event);
+  });
+  imageDialog?.addEventListener('cancel', (event) => {
+    event.preventDefault();
+    closeImageDialog();
+  });
   imageDialog?.addEventListener('close', () => {
     document.body.classList.remove('tk-product-dialog-open');
     if (imageDialogStage) imageDialogStage.replaceChildren();

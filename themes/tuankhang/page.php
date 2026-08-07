@@ -6,7 +6,7 @@ $page_id = get_the_ID();
 $title = get_the_title($page_id);
 $content_html = '';
 if (is_page(63)) {
-    $story = function_exists('get_field') ? get_field('wpcf-cau-chuyen-ve-tuan-khang', 61) : get_post_meta(61, 'wpcf-cau-chuyen-ve-tuan-khang', true);
+    $story = (string) tk_home_option('story.content');
     if ($story) $content_html .= apply_filters('the_content', $story);
 }
 $content_html .= apply_filters('the_content', get_the_content(null, false, $page_id));

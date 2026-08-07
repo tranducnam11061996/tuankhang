@@ -11,7 +11,8 @@ if (!function_exists('imagewebp') || !function_exists('imageavif')) {
     exit(1);
 }
 
-$page_id = 61;
+$page_id = 61; // Legacy fallback retained for one migration cycle.
+$home_options = get_option('tuankhang_home_options', array());
 $output_dir = dirname(__DIR__) . '/assets/dist/images/home';
 if (!is_dir($output_dir) && !wp_mkdir_p($output_dir)) {
     fwrite(STDERR, "Không tạo được thư mục ảnh output.\n");
@@ -19,17 +20,17 @@ if (!is_dir($output_dir) && !wp_mkdir_p($output_dir)) {
 }
 
 $groups = array(
-    'hero' => array('fields' => array('tk_home_hero_image', 'duytv_story_image', 'wpcf-anhbanner-1', 'wpcf-anhbanner-2'), 'widths' => array(480, 768, 1200, 1600)),
+    'hero' => array('fields' => array('option:hero.image_id', 'tk_home_hero_image', 'duytv_story_image', 'wpcf-anhbanner-1', 'wpcf-anhbanner-2'), 'widths' => array(480, 768, 1200, 1600)),
     'hero-proof' => array(
-        'fields' => array('tk_home_hero_secondary_image'),
+        'fields' => array('option:hero.secondary_image_id', 'tk_home_hero_secondary_image'),
         'widths' => array(320, 480, 768),
         'fallback_id' => 2250,
         'filename_suffix' => '-proof',
         'crop' => array('x' => 0.16, 'y' => 0.0, 'width' => 0.72, 'height' => 0.78),
     ),
-    'story' => array('fields' => array('duytv_story_image'), 'widths' => array(480, 768, 1200, 1600)),
+    'story' => array('fields' => array('option:story.image_id', 'duytv_story_image'), 'widths' => array(480, 768, 1200, 1600)),
     'capability' => array('fields' => array_merge(
-        array('duytv_story_image'),
+        array('option:capability.image_id', 'duytv_story_image'),
         array_map(fn($i) => 'duytv_news_image_' . $i, range(1, 5))
     ), 'widths' => array(480, 768, 1200, 1600)),
     'news' => array('fields' => array_merge(
@@ -41,9 +42,27 @@ $groups = array(
     'partner' => array('fields' => array_map(fn($i) => 'wpcf-doi-tac-' . $i, range(1, 10)), 'widths' => array(160, 320)),
 );
 
+foreach ((array) ($home_options['partners'] ?? array()) as $index => $partner) {
+    $groups['partner']['fields'][] = 'option:partners.' . $index . '.image_id';
+}
+foreach ((array) ($home_options['projects'] ?? array()) as $index => $project) {
+    $groups['project']['fields'][] = 'option:projects.' . $index . '.image_id';
+}
+
 function tk_build_image_value(string $field, int $page_id, int $fallback_id = 0): array
 {
-    $value = function_exists('get_field') ? get_field($field, $page_id) : get_post_meta($page_id, $field, true);
+    if (strpos($field, 'option:') === 0) {
+        $value = get_option('tuankhang_home_options', array());
+        foreach (explode('.', substr($field, 7)) as $segment) {
+            if (!is_array($value) || !array_key_exists($segment, $value)) {
+                $value = '';
+                break;
+            }
+            $value = $value[$segment];
+        }
+    } else {
+        $value = function_exists('get_field') ? get_field($field, $page_id) : get_post_meta($page_id, $field, true);
+    }
     $id = 0;
     $url = '';
     if (is_array($value)) {
@@ -132,9 +151,15 @@ foreach ($groups as $group) {
 }
 
 $project_source_dir = dirname(__DIR__) . '/assets/src/images/projects';
-$project_thumbnails = array('project-hanam', 'project-dany', 'project-phusan');
-foreach ($project_thumbnails as $project_thumbnail) {
-    $source = $project_source_dir . '/' . $project_thumbnail . '.png';
+$project_thumbnails = array(
+    'project-hanam' => 'png',
+    'project-dany' => 'png',
+    'project-phusan' => 'png',
+    'project-thucuc' => 'jpg',
+    'project-bichngoc' => 'jpg',
+);
+foreach ($project_thumbnails as $project_thumbnail => $extension) {
+    $source = $project_source_dir . '/' . $project_thumbnail . '.' . $extension;
     if (!is_file($source)) {
         continue;
     }

@@ -80,6 +80,25 @@
 }
 .tk-catalog-hero-description { max-width: 42rem; margin: 1.5rem 0 0; color: var(--tk-catalog-muted); font-size: 1rem; line-height: 1.75; text-wrap: pretty; }
 .tk-catalog-hero-actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 2rem; }
+.tk-catalog-consultation-actions { display: inline-flex; width: fit-content; max-width: 100%; align-self: flex-start; }
+.tk-catalog-consultation-actions .tk-product-consultation-primary {
+  width: auto;
+  min-height: 60px;
+  gap: .4rem;
+  border-color: #d1e2ed;
+  border-radius: 16px;
+  padding: .4rem;
+  box-shadow: 0 10px 24px rgb(1 57 116 / 13%);
+}
+.tk-catalog-consultation-actions .tk-product-consultation-form-trigger {
+  flex: 0 0 auto;
+  gap: .55rem;
+  padding: .35rem .65rem .35rem .45rem;
+  font-size: .84rem;
+  white-space: nowrap;
+}
+.tk-catalog-consultation-actions .tk-product-consultation-form-icon { width: 32px; height: 32px; }
+.tk-catalog-consultation-actions .tk-product-consultation-primary-divider { height: 28px; }
 .tk-catalog-button {
   display: inline-flex;
   min-height: 50px;
@@ -316,6 +335,7 @@ body.tk-product-filter-open { overflow: hidden; }
 }
 
 @media (min-width: 1024px) {
+  .tk-catalog-consultation-actions { width: fit-content; max-width: 100%; min-width: 0; flex: 0 1 auto; }
   .tk-catalog-hero { min-height: 690px; }
   .tk-catalog-hero-grid { grid-template-columns: minmax(0, 7fr) minmax(25rem, 5fr); min-height: 690px; gap: 3.5rem; }
   .tk-catalog-breadcrumbs { margin-bottom: 3.75rem; }
@@ -344,6 +364,7 @@ body.tk-product-filter-open { overflow: hidden; }
   .tk-catalog-breadcrumbs { margin-bottom: 2rem; }
   .tk-catalog-hero-grid { padding-top: 1rem; }
   .tk-catalog-hero-actions { flex-direction: column; align-items: stretch; }
+  .tk-catalog-consultation-actions { width: fit-content; max-width: 100%; align-self: flex-start; }
   .tk-catalog-hero-stats { gap: 0; }
   .tk-catalog-hero-stats div { padding: 0 .55rem; }
   .tk-catalog-hero-stats dt { font-size: 1.25rem; }
@@ -352,6 +373,12 @@ body.tk-product-filter-open { overflow: hidden; }
   .tk-catalog-hero-stage { inset: 5% 3% 18%; }
   .tk-catalog-hero-product { left: 6%; }
   .tk-catalog-section { padding-top: 3.5rem; }
+  .term-multysystem .tk-catalog-toolbar { display: grid; margin-bottom: 1.75rem; border-bottom: 0; padding-bottom: 0; }
+  .term-multysystem .tk-catalog-toolbar-heading span,
+  .term-multysystem .tk-catalog-search,
+  .term-multysystem .tk-catalog-filter-open { display: none; }
+  .term-implant .tk-catalog-search,
+  .term-implant .tk-catalog-filter-open { display: none; }
   .tk-product-listing .tk-catalog-featured { padding: 3.75rem 0 4rem; background: radial-gradient(circle at 8% 8%, rgb(42 166 220 / 17%), transparent 18rem), radial-gradient(circle at 92% 86%, rgb(1 57 116 / 10%), transparent 20rem), radial-gradient(circle at 110% 22%, transparent 0 9rem, rgb(11 103 178 / 12%) 9.06rem, transparent 9.14rem 12.5rem, rgb(11 103 178 / 7%) 12.56rem, transparent 12.64rem), linear-gradient(145deg, #eef8fd 0%, #e4f1f8 54%, #f7fbfd 100%); }
   .tk-product-listing .tk-catalog-featured::before { background-size: 32px 32px; -webkit-mask-image: linear-gradient(180deg, #000 0%, rgb(0 0 0 / 58%) 66%, transparent 100%); mask-image: linear-gradient(180deg, #000 0%, rgb(0 0 0 / 58%) 66%, transparent 100%); }
 }
